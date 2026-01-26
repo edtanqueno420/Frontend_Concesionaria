@@ -1,11 +1,24 @@
+import AppRouter from "./routes/AppRouter";
+import { Toaster } from "sonner";
+import "./index.css";
+
+/**
+ * Componente principal de la aplicación.
+ * Aquí envolvemos el Router con los proveedores globales.
+ */
 function App() {
   return (
-    <div className="min-h-screen flex items-center justify-center">
-      <h1 className="text-4xl font-bold text-blue-600">
-        Tailwind funcionando 🚀
-      </h1>
-    </div>
-  )
+    <>
+      <Toaster 
+        position="top-center" 
+        richColors 
+        closeButton
+        expand={false}
+      />
+      <AppRouter />
+
+    </>
+  );
 }
 
-export default App
+export default App;

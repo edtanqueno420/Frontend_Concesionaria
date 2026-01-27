@@ -1,7 +1,8 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "https://yec-concesionaria-api.desarrollo-software.xyz", // Cambia esto al puerto de tu backend local
+  baseURL: "https://yec-concesionario-api.desarrollo-software.xyz",
+  withCredentials: true, // 🔥 importante para CORS
 });
 
 api.interceptors.request.use((config) => {
@@ -13,9 +14,3 @@ api.interceptors.request.use((config) => {
 });
 
 export default api;
-
-
-
-
-
-

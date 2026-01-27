@@ -1,33 +1,59 @@
-import { createContext, useContext, useState } from "react";
-import api from "../api/axios";
+import { createContext, useContext, useState, type ReactNode } from "react";
 
-interface AuthContextType {
-  user: any;
-  login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+interface User {
+  id: number;
+  nombre: string;
+  rol: "cliente" | "vendedor" | "administrador";
 }
 
-const AuthContext = createContext<AuthContextType>(null!);
+interface AuthContextType {
+  user: User | null;
+  login: (userData: User) => void;
+  logout: () => void;
+  isAuthenticated: () => boolean;
+  isVendedorOrAdmin: () => boolean;
+}
 
-export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState(null);
+const AuthContext = createContext<AuthContextType | null>(null);
 
-  const login = async (email: string, password: string) => {
-    const res = await api.post("/auth/login", { email, password });
-    localStorage.setItem("token", res.data.access_token);
-    setUser(res.data.user);
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const [user, setUser] = useState<User | null>(null);
+
+  const login = (userData: User) => {
+    setUser(userData);
   };
 
   const logout = () => {
-    localStorage.removeItem("token");
     setUser(null);
   };
 
+  const isAuthenticated = () => {
+    return user !== null;
+  };
+
+  const isVendedorOrAdmin = () => {
+    return user?.rol === "vendedor" || user?.rol === "administrador";
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        login,
+        logout,
+        isAuthenticated,
+        isVendedorOrAdmin,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   );
 }
 
-export const useAuth = () => useContext(AuthContext);
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth debe usarse dentro de AuthProvider");
+  }
+  return context;
+}

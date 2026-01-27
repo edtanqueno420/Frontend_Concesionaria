@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { loginRequest } from '../services/authService';
+import api from '../api/axios';
 import { 
   Car, Mail, Lock, AlertCircle, Eye, EyeOff, Loader2, 
-  User, IdCard, ArrowRight
+  User, ArrowRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -21,7 +21,6 @@ export function LoginScreen() {
   const [email, setEmail] = useState(() => localStorage.getItem('yec_remembered_email') || '');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [cedula, setCedula] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
   // --- REAL-TIME VALIDATIONS ---
@@ -42,7 +41,7 @@ export function LoginScreen() {
     setPasswordStrength(password ? strength : 0);
   }, [password]);
 
-  // --- SUBMIT LOGIC (YOUR BACKEND) ---
+  // --- HANDLE SUBMIT ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -50,21 +49,36 @@ export function LoginScreen() {
 
     try {
       if (isRegisterMode) {
+        // Validación de contraseñas
         if (password !== confirmPassword) throw new Error('Las contraseñas no coinciden');
-      
+
+        // Separar nombre y apellido
+        const [nombre, apellido = ''] = fullName.split(' ', 2);
+
+        // Registrar usuario
+        await api.post('/auth/register', { nombre, apellido, email, password });
+
         toast.success('¡Cuenta creada! Ya puedes iniciar sesión');
         setIsRegisterMode(false);
+
+        // Limpiar campos
+        setFullName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+
       } else {
-        const data = await loginRequest({ email, password });
-        
-        localStorage.setItem('token', data.token);
-        localStorage.setItem('user', JSON.stringify(data.user));
+        // Login
+        const res = await api.post('/auth/login', { email, password });
+
+        localStorage.setItem('token', res.data.access_token);
+        localStorage.setItem('user', JSON.stringify(res.data.user));
 
         if (rememberMe) localStorage.setItem('yec_remembered_email', email);
         else localStorage.removeItem('yec_remembered_email');
 
-        toast.success(`¡Bienvenido, ${data.user.nombre}!`);
-        navigate(data.user.rol === 'cliente' ? '/' : '/marcas');
+        toast.success(`¡Bienvenido, ${res.data.user.nombre}!`);
+        navigate(res.data.user.rol === 'cliente' ? '/home' : '/marcas');
       }
     } catch (err: any) {
       const msg = err.response?.data?.message || err.message || 'Error en la solicitud';
@@ -94,7 +108,7 @@ export function LoginScreen() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-black flex items-center justify-center p-4 font-sans">
       <div className="w-full max-w-md animate-in fade-in zoom-in duration-500">
-        {/* LOGO SECTION */}
+        {/* LOGO */}
         <div className="text-center mb-6">
           <div className="inline-flex items-center justify-center mb-4 bg-white rounded-2xl p-4 shadow-[0_0_30px_rgba(220,38,38,0.3)]">
             <Car className="w-12 h-12 text-red-600" />
@@ -105,7 +119,7 @@ export function LoginScreen() {
           <p className="text-red-300/60 text-xs font-bold uppercase tracking-[0.2em] mt-1">Excelencia Automotriz</p>
         </div>
 
-        {/* MAIN CARD */}
+        {/* CARD */}
         <div className="bg-white/95 backdrop-blur-xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20">
           <div className="p-8 pb-4 border-b-4 border-slate-100">
             <h2 className="text-2xl font-black text-slate-900 uppercase">
@@ -115,39 +129,51 @@ export function LoginScreen() {
               {isRegisterMode ? 'Únete a nuestra plataforma' : 'Bienvenido de vuelta'}
             </p>
           </div>
-          
+
           <form onSubmit={handleSubmit} className="p-8 space-y-4">
             {isRegisterMode && (
               <div className="grid grid-cols-1 gap-4">
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input type="text" placeholder="Nombre Completo" required className="w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-red-600/20 border border-transparent focus:border-red-600 transition-all text-sm font-bold" 
-                    value={fullName} onChange={e => setFullName(e.target.value)} />
-                </div>
-                <div className="relative">
-                  <IdCard className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input type="text" placeholder="Cédula" required className="w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none border border-transparent focus:border-red-600 transition-all text-sm font-bold" 
-                    value={cedula} onChange={e => setCedula(e.target.value)} />
+                  <input 
+                    type="text" 
+                    placeholder="Nombre Completo" 
+                    required 
+                    className="w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-red-600/20 border border-transparent focus:border-red-600 transition-all text-sm font-bold" 
+                    value={fullName} 
+                    onChange={e => setFullName(e.target.value)} 
+                  />
                 </div>
               </div>
             )}
 
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input type="email" placeholder="Email" required className={`w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none border transition-all text-sm font-bold ${!emailValid ? 'border-red-500' : 'border-transparent focus:border-red-600'}`} 
-                value={email} onChange={e => setEmail(e.target.value)} />
+              <input 
+                type="email" 
+                placeholder="Email" 
+                required 
+                className={`w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none border transition-all text-sm font-bold ${!emailValid ? 'border-red-500' : 'border-transparent focus:border-red-600'}`} 
+                value={email} 
+                onChange={e => setEmail(e.target.value)} 
+              />
             </div>
 
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input type={showPassword ? 'text' : 'password'} placeholder="Contraseña" required className="w-full pl-11 pr-12 py-3 bg-slate-100 rounded-xl outline-none border border-transparent focus:border-red-600 transition-all text-sm font-bold" 
-                value={password} onChange={e => setPassword(e.target.value)} />
+              <input 
+                type={showPassword ? 'text' : 'password'} 
+                placeholder="Contraseña" 
+                required 
+                className="w-full pl-11 pr-12 py-3 bg-slate-100 rounded-xl outline-none border border-transparent focus:border-red-600 transition-all text-sm font-bold" 
+                value={password} 
+                onChange={e => setPassword(e.target.value)} 
+              />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
 
-            {/* Password Strength Indicator */}
             {isRegisterMode && password && (
               <div className="space-y-1">
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
@@ -167,8 +193,14 @@ export function LoginScreen() {
             {isRegisterMode && (
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input type="password" placeholder="Confirmar Contraseña" required className="w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none border border-transparent focus:border-red-600 transition-all text-sm font-bold" 
-                  value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} />
+                <input 
+                  type="password" 
+                  placeholder="Confirmar Contraseña" 
+                  required 
+                  className="w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none border border-transparent focus:border-red-600 transition-all text-sm font-bold" 
+                  value={confirmPassword} 
+                  onChange={e => setConfirmPassword(e.target.value)} 
+                />
               </div>
             )}
 
@@ -178,7 +210,6 @@ export function LoginScreen() {
                   <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} className="accent-red-600 w-4 h-4" />
                   RECORDARME
                 </label>
-                <button type="button" className="text-xs font-black text-red-600 hover:underline uppercase">¿Olvidaste tu clave?</button>
               </div>
             )}
 
@@ -197,21 +228,6 @@ export function LoginScreen() {
               {isRegisterMode ? '¿Ya tienes cuenta? Entra aquí' : '¿No tienes cuenta? Regístrate'}
             </button>
           </form>
-
-          {/* DEMO CREDENTIALS - Figma Style */}
-          {!isRegisterMode && (
-            <div className="p-8 bg-slate-50 border-t border-slate-100">
-              <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
-                <p className="text-[10px] font-black text-red-600 uppercase tracking-widest mb-2 flex items-center gap-2">
-                  <Car size={14} /> Modo Demostración
-                </p>
-                <p className="text-xs text-slate-600 font-bold italic">admin@yecmotors.com / admin123</p>
-                <button onClick={() => {setEmail('admin@yecmotors.com'); setPassword('admin123');}} className="mt-3 text-xs font-black text-slate-900 flex items-center gap-1 hover:text-red-600 transition-all uppercase">
-                  Cargar datos demo <ArrowRight size={14} />
-                </button>
-              </div>
-            </div>
-          )}
         </div>
       </div>
     </div>

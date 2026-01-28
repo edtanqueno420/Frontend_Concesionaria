@@ -1,7 +1,7 @@
 import { Phone, Mail, LogOut, User as UserIcon, Home, Users } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 //import { SucursalSelector } from './SucursalSelector';
-//import { YECLogo } from './YECLogo';
+import { YECLogo } from './YECLogo';
 import { useState } from 'react';
 
 interface HeaderProps {
@@ -22,7 +22,7 @@ export function Header({ onNavigateHome, onNavigateVendedorPanel }: HeaderProps)
           <div className="flex items-center justify-between flex-wrap gap-4">
             <div className="flex items-center gap-3 cursor-pointer hover:opacity-80 transition-opacity" onClick={onNavigateHome}>
               <div className="bg-white rounded-lg p-2">
-                {/*<YECLogo className="w-10 h-10" />*/}
+                <YECLogo className="w-10 h-10" />
               </div>
               <div>
                 <h2 className="text-white font-bold text-2xl">YEC MOTORS</h2>

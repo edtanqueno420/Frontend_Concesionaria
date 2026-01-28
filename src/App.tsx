@@ -1,23 +1,25 @@
-import AppRouter from "./routes/AppRouter";
-import { Toaster } from "sonner";
-import "./index.css";
+import { Routes, Route, Navigate } from "react-router-dom";
+import { LoginScreen } from "./auth/LoginScreen";
+import { MainLayout } from "./layout/MainLayout";
+import { HomePage } from "./pages/HomePage";
+import { useAuth } from "./auth/AuthContext";
 
-/**
- * Componente principal de la aplicación.
- * Aquí envolvemos el Router con los proveedores globales.
- */
 function App() {
-  return (
-    <>
-      <Toaster 
-        position="top-center" 
-        richColors 
-        closeButton
-        expand={false}
-      />
-      <AppRouter />
+  const { isAuthenticated } = useAuth();
 
-    </>
+  return (
+    <Routes>
+      <Route path="/login" element={<LoginScreen />} />
+
+      {isAuthenticated() ? (
+        <Route element={<MainLayout />}>
+          <Route path="/home" element={<HomePage />} />
+          {/* otras rutas protegidas */}
+        </Route>
+      ) : (
+        <Route path="*" element={<Navigate to="/login" />} />
+      )}
+    </Routes>
   );
 }
 

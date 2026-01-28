@@ -29,4 +29,10 @@ export interface Vehiculo {
   estado: 'disponible' | 'reservado' | 'vendido';
   precio_final: number;
   version: Version;
+  marca?: string;
+  modelo?: string;
+  año?: number;
 }
+
+
+

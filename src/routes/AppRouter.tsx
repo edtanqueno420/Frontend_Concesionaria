@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import { LoginScreen } from "../auth/LoginScreen";
 import MarcaList from "../marcas/MarcaList";
 import ModeloList from "../modelos/ModeloList";
@@ -6,10 +6,11 @@ import VehiculoList from "../vehiculos/VehiculoList";
 import DashboardPage from "../pages/DashboardPage";
 import { HomePage } from "../pages/HomePage";
 import { MainLayout } from "../layout/MainLayout";
+import { CatalogPage } from "../pages/CatalogPage";
+
 
 export default function AppRouter() {
   return (
-    <BrowserRouter>
       <Routes>
         {/* Login */}
         <Route path="/login" element={<LoginScreen />} />
@@ -22,8 +23,9 @@ export default function AppRouter() {
           <Route path="/modelos" element={<ModeloList />} />
           <Route path="/vehiculos" element={<VehiculoList />} />
           <Route path="/panel" element={<DashboardPage />} />
+          <Route path="/catalogo" element={<CatalogPage />} />
+          
         </Route>
       </Routes>
-    </BrowserRouter>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Calendar, Clock, User, Phone, Mail, CheckCircle2 } from 'lucide-react';
+import { User, Phone, Mail, CheckCircle2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { createTestDrive } from '../services/testDriveService';
 import type { Vehiculo } from '../types';

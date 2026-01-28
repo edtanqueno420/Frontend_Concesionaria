@@ -4,10 +4,10 @@ import { VehicleCard } from '../components/VehicleCard';
 import { getVehicles } from '../services/vehicleService';
 import { TrendingUp, Search, Award, Shield, Users } from 'lucide-react';
 import type { Vehiculo } from '../types';
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
 
 export function HomePage() {
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
 
   useEffect(() => {

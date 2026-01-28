@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { useAuth } from '../auth/AuthContext'; // 👈 AÑADIDO
 import { 
   Car, Mail, Lock, AlertCircle, Eye, EyeOff, Loader2, 
   User, ArrowRight
@@ -9,7 +10,8 @@ import { toast } from 'sonner';
 
 export function LoginScreen() {
   const navigate = useNavigate();
-  
+  const { login } = useAuth(); // 👈 AÑADIDO
+
   // --- UI STATES ---
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -23,7 +25,7 @@ export function LoginScreen() {
   const [fullName, setFullName] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
 
-  // --- REAL-TIME VALIDATIONS ---
+  // --- VALIDACIONES ---
   const [emailValid, setEmailValid] = useState(true);
   const [passwordStrength, setPasswordStrength] = useState(0);
 
@@ -41,7 +43,7 @@ export function LoginScreen() {
     setPasswordStrength(password ? strength : 0);
   }, [password]);
 
-  // --- HANDLE SUBMIT ---
+  // --- SUBMIT ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -49,45 +51,64 @@ export function LoginScreen() {
 
     try {
       if (isRegisterMode) {
-        // Validación de contraseñas
-        if (password !== confirmPassword) throw new Error('Las contraseñas no coinciden');
+        if (password !== confirmPassword) {
+          throw new Error('Las contraseñas no coinciden');
+        }
 
-        // Separar nombre y apellido
         const [nombre, apellido = ''] = fullName.split(' ', 2);
 
-        // Registrar usuario
-        await api.post('/auth/register', { nombre, apellido, email, password });
+        await api.post('/auth/register', {
+          nombre,
+          apellido,
+          email,
+          password,
+        });
 
         toast.success('¡Cuenta creada! Ya puedes iniciar sesión');
         setIsRegisterMode(false);
-
-        // Limpiar campos
         setFullName('');
         setEmail('');
         setPassword('');
         setConfirmPassword('');
 
       } else {
-        // Login
+        // 🔐 LOGIN
         const res = await api.post('/auth/login', { email, password });
 
-        localStorage.setItem('token', res.data.access_token);
-        localStorage.setItem('user', JSON.stringify(res.data.user));
+        // ⬇️ CLAVE: guardar en AuthContext
+        login(res.data.user);
 
-        if (rememberMe) localStorage.setItem('yec_remembered_email', email);
-        else localStorage.removeItem('yec_remembered_email');
+        // opcional (si usas token)
+        localStorage.setItem('token', res.data.access_token);
+
+        if (rememberMe) {
+          localStorage.setItem('yec_remembered_email', email);
+        } else {
+          localStorage.removeItem('yec_remembered_email');
+        }
 
         toast.success(`¡Bienvenido, ${res.data.user.nombre}!`);
-        navigate(res.data.user.rol === 'cliente' ? '/home' : '/marcas');
+
+        navigate(
+          res.data.user.rol === 'cliente'
+            ? '/home'
+            : '/marcas'
+        );
       }
     } catch (err: any) {
-      const msg = err.response?.data?.message || err.message || 'Error en la solicitud';
+      const msg =
+        err.response?.data?.message ||
+        err.message ||
+        'Error en la solicitud';
       setError(msg);
       toast.error(msg);
     } finally {
       setLoading(false);
     }
   };
+
+  // 👇 TODO TU JSX SE QUEDA IGUAL (no lo toqué)
+
 
   const getPasswordStrengthColor = () => {
     if (passwordStrength === 0) return 'bg-gray-200';

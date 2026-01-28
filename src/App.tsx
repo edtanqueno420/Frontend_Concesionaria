@@ -5,12 +5,16 @@ import { HomePage } from "./pages/HomePage";
 import { useAuth } from "./auth/AuthContext";
 import { CatalogPage } from "./pages/CatalogPage";
 import { TestDrivePage } from "./pages/TestDrivePage";
+import { LandingPage } from "./pages/LandingPage";
 
 function App() {
   const { isAuthenticated } = useAuth();
 
   return (
     <Routes>
+      {/* 🌍 Landing pública */}
+  <Route path="/" element={<LandingPage />} />
+
       <Route path="/login" element={<LoginScreen />} />
 
       {isAuthenticated() ? (

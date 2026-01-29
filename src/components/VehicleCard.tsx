@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { VehicleDetailsDialog } from './VehicleDetailsDialog.tsx';
 import { useFavorites } from './FavoritesContext.tsx'; 
-import { useAuth } from '../auth/AuthContext.tsx';
+import { useAuth } from '../auth/AuthContext';
 import { 
   Gauge, Calendar, Heart, 
   ShoppingCart, Eye 

@@ -1,11 +1,13 @@
 import { createContext, useContext, useState, type ReactNode } from "react";
 
+// 1. Definimos la estructura del usuario
 interface User {
   id: number;
   nombre: string;
   rol: "cliente" | "vendedor" | "administrador";
 }
 
+// 2. Definimos qué funciones y datos ofrece el contexto
 interface AuthContextType {
   user: User | null;
   login: (userData: User) => void;
@@ -17,6 +19,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+  // Intentamos recuperar al usuario del navegador al iniciar
   const [user, setUser] = useState<User | null>(() => {
     const storedUser = localStorage.getItem("user");
     return storedUser ? JSON.parse(storedUser) : null;
@@ -33,9 +36,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem("user");
   };
 
-  const isAuthenticated = () => {
-    return user !== null;
-  };
+  const isAuthenticated = () => user !== null;
 
   const isVendedorOrAdmin = () => {
     return user?.rol === "vendedor" || user?.rol === "administrador";
@@ -56,10 +57,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// 3. Hook para usar la autenticación en cualquier parte
 export function useAuth() {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error("useAuth debe usarse dentro de AuthProvider");
+    throw new Error("useAuth debe usarse dentro de un AuthProvider");
   }
   return context;
 }

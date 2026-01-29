@@ -7,6 +7,7 @@ import DashboardPage from "../pages/DashboardPage";
 import { HomePage } from "../pages/HomePage";
 import { MainLayout } from "../layout/MainLayout";
 import { CatalogPage } from "../pages/CatalogPage";
+import { VehicleManagement } from '../pages/VehicleManagement';
 
 
 export default function AppRouter() {
@@ -26,7 +27,7 @@ export default function AppRouter() {
           <Route path="/vehiculos" element={<VehiculoList />} />
           <Route path="/panel" element={<DashboardPage />} />
           <Route path="/catalogo" element={<CatalogPage />} />
-          
+          <Route path="/vehiculos/gestion" element={<VehicleManagement />} />
         </Route>
       </Routes>
   );

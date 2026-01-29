@@ -20,7 +20,7 @@ export default function DashboardPage() {
         const [v, m, u] = await Promise.all([
           api.get('/vehiculos'),
           api.get('/marcas'),
-          api.get('/auth/users') // Ajusta según tu ruta de usuarios
+          api.get('/auth/users') 
         ]);
         
         const totalValue = v.data.reduce((acc: number, cur: any) => acc + Number(cur.precio), 0);

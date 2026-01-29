@@ -41,7 +41,7 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* 2. NAVEGACIÓN (Desktop) */}
+          {/* NAVEGACIÓN (Desktop) */}
           <div className="hidden md:flex items-center gap-2">
             
             <Link to="/catalogo" className="flex items-center gap-2 px-4 py-2 text-slate-300 hover:text-white hover:bg-white/5 rounded-xl transition-all text-xs font-black uppercase tracking-widest">
@@ -96,7 +96,7 @@ export default function Navbar() {
             </div>
           </div>
 
-          {/* 3. BOTÓN MENÚ MÓVIL */}
+          {/* BOTÓN MENÚ MÓVIL */}
           <div className="md:hidden">
             <button 
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -109,7 +109,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* 4. MENÚ MÓVIL (Slide down) */}
+      {/* MENÚ MÓVIL */}
       {isMobileMenuOpen && (
         <div className="md:hidden bg-slate-900 border-t border-slate-800 p-4 space-y-4 animate-in slide-in-from-top-5">
           <Link to="/catalogo" className="flex items-center gap-4 text-slate-300 p-3 hover:bg-slate-800 rounded-xl font-bold">

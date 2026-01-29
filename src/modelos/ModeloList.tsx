@@ -14,7 +14,7 @@ export default function ModeloList() {
   const fetchModelos = async () => {
     setLoading(true);
     try {
-      // Tu backend debería devolver el modelo con la marca incluida (ej: { id, nombre, marca: { nombre } })
+      // Tu backend debería devolver el modelo con la marca incluida 
       const res = await api.get("/modelos");
       setModelos(res.data);
     } catch (error) {

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../auth/AuthContext';
 import { YECLogo } from './YECLogo';
 import { User, LogOut } from 'lucide-react';
 

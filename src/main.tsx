@@ -1,11 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { BrowserRouter } from 'react-router-dom';
-<<<<<<< HEAD
-import { AuthProvider } from './components/AuthContext';
-=======
 import { AuthProvider } from './auth/AuthContext';
->>>>>>> origin/main
 import App from './App';
 import "./index.css";
 

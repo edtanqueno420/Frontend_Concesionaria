@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { VehicleDetailsDialog } from './VehicleDetailsDialog.tsx';
-//import { useFavorites } from './FavoritesContext.tsx'; 
-import { useAuth } from '../auth/AuthContext.tsx';
+import { useFavorites } from './FavoritesContext.tsx'; 
+import { useAuth } from '../auth/AuthContext';
 import { 
   Gauge, Calendar, Heart, 
   ShoppingCart, Eye 
@@ -26,9 +26,9 @@ export function VehicleCard({
   onStartSale 
 }: VehicleCardProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
-  //const { isFavorite, toggleFavorite } = useFavorites(); // ✅ Hook corregido
+  const { isFavorite, toggleFavorite } = useFavorites(); // ✅ Hook corregido
   const { user } = useAuth();
-  //const favorite = isFavorite(vehiculo.id);
+  const favorite = isFavorite(vehiculo.id);
 
   // --- EXTRACCIÓN DE DATOS RELACIONALES (NestJS JSON) ---
   const infoVersion = vehiculo.version;

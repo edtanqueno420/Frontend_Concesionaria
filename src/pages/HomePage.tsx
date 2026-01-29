@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react';
-import { VehicleCard } from '../components/VehicleCard';
-import { getVehicles } from '../services/vehicleService';
-import { TrendingUp, Search, Award, Shield, Users } from 'lucide-react';
-import type { Vehiculo } from '../types';
-import { useNavigate } from 'react-router-dom';
-import { Button } from '../components/ui/button';
+import { useEffect, useState } from "react";
+import { VehicleCard } from "../components/VehicleCard";
+import { getVehicles } from "../services/vehicleService";
+import { TrendingUp, Search, Award, Shield, Users } from "lucide-react";
+import type { Vehiculo } from "../types";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../components/ui/button";
+import edificio from "../assets/edificio.png";
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -16,7 +17,7 @@ export function HomePage() {
         const data = await getVehicles();
         setVehiculos(data);
       } catch (err) {
-        console.error('Error cargando vehículos', err);
+        console.error("Error cargando vehículos", err);
       }
     }
     fetchVehicles();
@@ -28,14 +29,18 @@ export function HomePage() {
   return (
     <div className="space-y-16">
       {/* HERO */}
-      <section className="relative bg-gradient-to-br from-slate-900 via-black to-slate-900 text-white rounded-2xl overflow-hidden border-4 border-red-600">
-        <div className="absolute inset-0 bg-black/20"></div>
+      <section
+        className="relative min-h-[520px] text-white rounded-2xl overflow-hidden border-4 border-red-600 bg-no-repeat"
+        style={{
+          backgroundImage: `url(${edificio})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        {/* Overlay (más suave para que se vea la foto) */}
+        <div className="absolute inset-0 bg-black/40" />
 
         <div className="relative px-8 py-20 md:py-28 text-center">
-          <div className="inline-flex items-center gap-3 mb-6 bg-white/10 backdrop-blur-sm px-6 py-3 rounded-full border-2 border-red-500">
-            <span className="font-bold text-lg text-white">YEC MOTORS</span>
-          </div>
-
           <h1 className="text-white mb-6 max-w-3xl mx-auto text-5xl font-bold">
             Tu Mejor Opción en Vehículos de Calidad
           </h1>
@@ -49,7 +54,7 @@ export function HomePage() {
             <Button
               size="lg"
               className="bg-red-600 hover:bg-red-700 text-white px-8"
-              onClick={() => navigate('/catalogo')}
+              onClick={() => navigate("/catalogo")}
             >
               Catálogo Completo
             </Button>
@@ -57,8 +62,8 @@ export function HomePage() {
             <Button
               size="lg"
               variant="outline"
-              className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white px-8"
-              onClick={() => navigate('/vehiculo/:id/test-drive')}
+              className="bg-red-600 text-white px-8 hover:bg-red-700"
+              onClick={() => navigate("/vehiculo/1/test-drive")}
             >
               Test Drive
             </Button>

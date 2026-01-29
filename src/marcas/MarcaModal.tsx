@@ -31,7 +31,6 @@ export function MarcaModal({ isOpen, onClose, onSave, editData }: MarcaModalProp
 
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      {/* Backdrop (Fondo oscuro) */}
       <div className="absolute inset-0 bg-slate-950/60 backdrop-blur-sm animate-fade-in" onClick={onClose}></div>
 
       {/* Ventana Modal */}

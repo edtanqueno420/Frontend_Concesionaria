@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { VehicleCard } from "../components/VehicleCard";
-import { getVehicles } from "../services/vehicleService";
+import { vehicleService } from "../services/vehicleService";
 import { TrendingUp, Search, Award, Shield, Users } from "lucide-react";
 import type { Vehiculo } from "../types";
 import { useNavigate } from "react-router-dom";
@@ -14,7 +14,7 @@ export function HomePage() {
   useEffect(() => {
     async function fetchVehicles() {
       try {
-        const data = await getVehicles();
+        const data = await vehicleService.getAll();
         setVehiculos(data);
       } catch (err) {
         console.error("Error cargando vehículos", err);
@@ -37,7 +37,7 @@ export function HomePage() {
           backgroundPosition: "center",
         }}
       >
-        {/* Overlay (más suave para que se vea la foto) */}
+        {/* Overlay */}
         <div className="absolute inset-0 bg-black/40" />
 
         <div className="relative px-8 py-20 md:py-28 text-center">
@@ -107,7 +107,14 @@ export function HomePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {masVendidos.map((v) => (
-            <VehicleCard key={v.id} vehiculo={v} />
+            <VehicleCard 
+              key={v.id} 
+              vehiculo={v} 
+              isComparing={false}
+              onToggleCompare={() => {}}
+              canAddToCompare={false}
+              viewMode="grid"
+            />
           ))}
         </div>
       </section>
@@ -121,7 +128,14 @@ export function HomePage() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {masBuscados.map((v) => (
-            <VehicleCard key={v.id} vehiculo={v} />
+            <VehicleCard 
+              key={v.id} 
+              vehiculo={v} 
+              isComparing={false}
+              onToggleCompare={() => {}}
+              canAddToCompare={false}
+              viewMode="grid"
+            />
           ))}
         </div>
       </section>

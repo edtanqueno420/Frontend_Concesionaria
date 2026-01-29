@@ -2,7 +2,6 @@ import { useNavigate } from 'react-router-dom';
 import {Car,ArrowRight,} from 'lucide-react';
 import { YECLogo } from '../components/YECLogo';
 import heroCar from '../assets/hero-car.png';
-//Shield, TrendingUp, Users, Phone, Mail, MapPin, Star
 export function LandingPage() {
   const navigate = useNavigate();
 

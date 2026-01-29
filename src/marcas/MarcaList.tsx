@@ -16,7 +16,7 @@ export default function MarcaList() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedMarca, setSelectedMarca] = useState<any>(null);
 
-  // 1. Cargar datos
+  // Cargar datos
   const fetchMarcas = async () => {
     setLoading(true);
     try {
@@ -33,7 +33,7 @@ export default function MarcaList() {
     fetchMarcas();
   }, []);
 
-  // 2. Lógica de borrado
+  // Lógica de borrado
   const handleDelete = async (id: number) => {
     if (!confirm("¿Seguro que deseas eliminar esta marca?")) return;
     try {
@@ -45,7 +45,7 @@ export default function MarcaList() {
     }
   };
 
-  // 3. Filtro de búsqueda
+  // Filtro de búsqueda
   const filteredMarcas = marcas.filter(m => 
     m.nombre.toLowerCase().includes(searchTerm.toLowerCase())
   );
@@ -96,9 +96,7 @@ export default function MarcaList() {
         >
           <RefreshCw className={`w-5 h-5 ${loading ? 'animate-spin' : ''}`} />
         </button>
-      </div>
-
-      {/* TABLA ESTILO FIGMA */}
+      </div>                                                     
       <div className="bg-white rounded-[2.5rem] shadow-2xl shadow-slate-200/60 overflow-hidden border border-slate-100">
         <table className="w-full text-left">
           <thead>

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { useAuth } from '../auth/AuthContext'; // 👈 AÑADIDO
+import { useAuth } from '../components/AuthContext'; // 👈 AÑADIDO
 import { 
   Car, Mail, Lock, AlertCircle, Eye, EyeOff, Loader2, 
   User, ArrowRight

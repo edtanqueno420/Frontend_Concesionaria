@@ -1,12 +1,32 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import api from '../api/axios';
-import { useAuth } from '../auth/AuthContext';
+import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
+import { useAuth } from "../auth/AuthContext";
 import {
-  Car, Mail, Lock, AlertCircle, Eye, EyeOff, Loader2,
-  User, ArrowRight
-} from 'lucide-react';
-import { toast } from 'sonner';
+  Car,
+  Mail,
+  Lock,
+  AlertCircle,
+  Eye,
+  EyeOff,
+  Loader2,
+  User,
+  ArrowRight,
+} from "lucide-react";
+import { toast } from "sonner";
+
+type RolNormalizado = "administrador" | "vendedor" | "cliente" | "otro";
+
+function normalizarRol(rol: unknown): RolNormalizado {
+  const r = String(rol ?? "")
+    .trim()
+    .toLowerCase();
+
+  if (r === "administrador" || r === "admin") return "administrador";
+  if (r === "vendedor" || r === "seller") return "vendedor";
+  if (r === "cliente" || r === "user") return "cliente";
+  return "otro";
+}
 
 export function LoginScreen() {
   const navigate = useNavigate();
@@ -16,14 +36,18 @@ export function LoginScreen() {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [rememberMe, setRememberMe] = useState(!!localStorage.getItem('yec_remembered_email'));
+  const [error, setError] = useState("");
+  const [rememberMe, setRememberMe] = useState(
+    !!localStorage.getItem("yec_remembered_email")
+  );
 
   // --- FORM STATES ---
-  const [email, setEmail] = useState(() => localStorage.getItem('yec_remembered_email') || '');
-  const [password, setPassword] = useState('');
-  const [fullName, setFullName] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [email, setEmail] = useState(
+    () => localStorage.getItem("yec_remembered_email") || ""
+  );
+  const [password, setPassword] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   // --- VALIDACIONES ---
   const [emailValid, setEmailValid] = useState(true);
@@ -46,77 +70,63 @@ export function LoginScreen() {
   // --- SUBMIT ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError('');
+    setError("");
     setLoading(true);
 
     try {
       if (isRegisterMode) {
-        if (password !== confirmPassword) {
-          throw new Error('Las contraseñas no coinciden');
-        }
+        if (password !== confirmPassword) throw new Error("Las contraseñas no coinciden");
 
-        const [nombre, apellido = ''] = fullName.split(' ', 2);
+        const [nombre, apellido = ""] = fullName.split(" ", 2);
 
-        await api.post('/auth/register', {
-          nombre,
-          apellido,
-          email,
-          password,
-        });
+        await api.post("/auth/register", { nombre, apellido, email, password });
 
-        toast.success('¡Cuenta creada! Ya puedes iniciar sesión');
+        toast.success("¡Cuenta creada! Ya puedes iniciar sesión");
         setIsRegisterMode(false);
-        setFullName('');
-        setEmail('');
-        setPassword('');
-        setConfirmPassword('');
+        setFullName("");
+        setEmail("");
+        setPassword("");
+        setConfirmPassword("");
+        return;
+      }
 
+      // 🔐 LOGIN
+      const res = await api.post("/auth/login", { email, password });
+
+      const user = res.data?.user;
+      const token = res.data?.access_token;
+
+      if (!user) throw new Error("Respuesta inválida: falta user");
+      if (!token) throw new Error("Respuesta inválida: falta access_token");
+
+      // ✅ Limpia valores anteriores (evita roles viejos)
+      localStorage.removeItem("token");
+      localStorage.removeItem("role");
+
+      // ✅ Guardar token / role (para guards)
+      const rolNormalizado = normalizarRol(user.rol);
+      localStorage.setItem("token", token);
+      localStorage.setItem("role", rolNormalizado);
+
+      // ✅ AuthContext (para tu app)
+      login(user);
+
+      // recordar email
+      if (rememberMe) localStorage.setItem("yec_remembered_email", email);
+      else localStorage.removeItem("yec_remembered_email");
+
+      toast.success(`¡Bienvenido, ${user.nombre ?? "usuario"}!`);
+
+      // ✅ REDIRECCIÓN POR ROL
+      if (rolNormalizado === "administrador") {
+        navigate("/admin", { replace: true });
+      } else if (rolNormalizado === "vendedor") {
+        navigate("/vendedor", { replace: true });
       } else {
-        // 🔐 LOGIN
-        const res = await api.post('/auth/login', { email, password });
-
-        // ✅ si tu backend responde así:
-        // res.data = { access_token: "...", user: { nombre, rol, ... } }
-
-        const user = res.data?.user;
-        const token = res.data?.access_token;
-
-        if (!user) throw new Error('Respuesta inválida: falta user');
-        if (!token) throw new Error('Respuesta inválida: falta access_token');
-
-        // ⬇️ guardar en AuthContext
-        login(user);
-
-        // ✅ guardar token/rol para proteger rutas luego
-        localStorage.setItem('token', token);
-        localStorage.setItem('role', user.rol);
-
-        // recordar email
-        if (rememberMe) {
-          localStorage.setItem('yec_remembered_email', email);
-        } else {
-          localStorage.removeItem('yec_remembered_email');
-        }
-
-        toast.success(`¡Bienvenido, ${user.nombre}!`);
-
-        // ✅ REDIRECCIÓN CORRECTA
-        // admin -> /admin
-        // cliente -> /home
-        // otro -> /marcas (fallback)
-        if (user.rol === 'admin') {
-          navigate('/admin', { replace: true });
-        } else if (user.rol === 'cliente') {
-          navigate('/home', { replace: true });
-        } else {
-          navigate('/marcas', { replace: true });
-        }
+        navigate("/home", { replace: true }); // cliente
       }
     } catch (err: any) {
-      const msg =
-        err.response?.data?.message ||
-        err.message ||
-        'Error en la solicitud';
+      const msg = err.response?.data?.message || err.message || "Error en la solicitud";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -124,21 +134,20 @@ export function LoginScreen() {
     }
   };
 
-  // 👇 TODO TU JSX SE QUEDA IGUAL (no lo toqué)
   const getPasswordStrengthColor = () => {
-    if (passwordStrength === 0) return 'bg-gray-200';
-    if (passwordStrength <= 25) return 'bg-red-500';
-    if (passwordStrength <= 50) return 'bg-yellow-500';
-    if (passwordStrength <= 75) return 'bg-blue-500';
-    return 'bg-green-500';
+    if (passwordStrength === 0) return "bg-gray-200";
+    if (passwordStrength <= 25) return "bg-red-500";
+    if (passwordStrength <= 50) return "bg-yellow-500";
+    if (passwordStrength <= 75) return "bg-blue-500";
+    return "bg-green-500";
   };
 
   const getPasswordStrengthText = () => {
-    if (passwordStrength === 0) return '';
-    if (passwordStrength <= 25) return 'Débil';
-    if (passwordStrength <= 50) return 'Media';
-    if (passwordStrength <= 75) return 'Fuerte';
-    return 'Muy fuerte';
+    if (passwordStrength === 0) return "";
+    if (passwordStrength <= 25) return "Débil";
+    if (passwordStrength <= 50) return "Media";
+    if (passwordStrength <= 75) return "Fuerte";
+    return "Muy fuerte";
   };
 
   return (
@@ -152,17 +161,19 @@ export function LoginScreen() {
           <h1 className="text-white text-4xl font-black italic tracking-tighter uppercase">
             YEC<span className="text-red-600">MOTORS</span>
           </h1>
-          <p className="text-red-300/60 text-xs font-bold uppercase tracking-[0.2em] mt-1">Excelencia Automotriz</p>
+          <p className="text-red-300/60 text-xs font-bold uppercase tracking-[0.2em] mt-1">
+            Excelencia Automotriz
+          </p>
         </div>
 
         {/* CARD */}
         <div className="bg-white/95 backdrop-blur-xl rounded-[2.5rem] shadow-2xl overflow-hidden border border-white/20">
           <div className="p-8 pb-4 border-b-4 border-slate-100">
             <h2 className="text-2xl font-black text-slate-900 uppercase">
-              {isRegisterMode ? 'Crear Cuenta' : 'Acceso'}
+              {isRegisterMode ? "Crear Cuenta" : "Acceso"}
             </h2>
             <p className="text-sm text-slate-500 font-medium">
-              {isRegisterMode ? 'Únete a nuestra plataforma' : 'Bienvenido de vuelta'}
+              {isRegisterMode ? "Únete a nuestra plataforma" : "Bienvenido de vuelta"}
             </p>
           </div>
 
@@ -177,7 +188,7 @@ export function LoginScreen() {
                     required
                     className="w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-red-600/20 border border-transparent focus:border-red-600 transition-all text-sm font-bold"
                     value={fullName}
-                    onChange={e => setFullName(e.target.value)}
+                    onChange={(e) => setFullName(e.target.value)}
                   />
                 </div>
               </div>
@@ -189,23 +200,29 @@ export function LoginScreen() {
                 type="email"
                 placeholder="Email"
                 required
-                className={`w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none border transition-all text-sm font-bold ${!emailValid ? 'border-red-500' : 'border-transparent focus:border-red-600'}`}
+                className={`w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none border transition-all text-sm font-bold ${
+                  !emailValid ? "border-red-500" : "border-transparent focus:border-red-600"
+                }`}
                 value={email}
-                onChange={e => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
 
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
-                type={showPassword ? 'text' : 'password'}
+                type={showPassword ? "text" : "password"}
                 placeholder="Contraseña"
                 required
                 className="w-full pl-11 pr-12 py-3 bg-slate-100 rounded-xl outline-none border border-transparent focus:border-red-600 transition-all text-sm font-bold"
                 value={password}
-                onChange={e => setPassword(e.target.value)}
+                onChange={(e) => setPassword(e.target.value)}
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+              >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
@@ -216,10 +233,11 @@ export function LoginScreen() {
                   <div
                     className={`h-1.5 rounded-full ${getPasswordStrengthColor()}`}
                     style={{ width: `${Math.max(5, passwordStrength)}%` }}
-                  ></div>
+                  />
                 </div>
                 <p className="text-xs font-medium text-slate-500">
-                  Seguridad: <span className={getPasswordStrengthColor().replace('bg-', 'text-')}>
+                  Seguridad:{" "}
+                  <span className={getPasswordStrengthColor().replace("bg-", "text-")}>
                     {getPasswordStrengthText()}
                   </span>
                 </p>
@@ -235,7 +253,7 @@ export function LoginScreen() {
                   required
                   className="w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none border border-transparent focus:border-red-600 transition-all text-sm font-bold"
                   value={confirmPassword}
-                  onChange={e => setConfirmPassword(e.target.value)}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
                 />
               </div>
             )}
@@ -243,7 +261,12 @@ export function LoginScreen() {
             {!isRegisterMode && (
               <div className="flex items-center justify-between px-1">
                 <label className="flex items-center gap-2 text-xs font-bold text-slate-500 cursor-pointer">
-                  <input type="checkbox" checked={rememberMe} onChange={e => setRememberMe(e.target.checked)} className="accent-red-600 w-4 h-4" />
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="accent-red-600 w-4 h-4"
+                  />
                   RECORDARME
                 </label>
               </div>
@@ -255,13 +278,27 @@ export function LoginScreen() {
               </div>
             )}
 
-            <button disabled={loading} className="w-full py-4 bg-slate-900 hover:bg-red-600 text-white rounded-2xl font-black text-sm transition-all shadow-xl shadow-red-600/10 flex items-center justify-center gap-2 group">
-              {loading ? <Loader2 className="animate-spin" /> : (isRegisterMode ? 'CREAR CUENTA' : 'INICIAR SESIÓN')}
+            <button
+              disabled={loading}
+              className="w-full py-4 bg-slate-900 hover:bg-red-600 text-white rounded-2xl font-black text-sm transition-all shadow-xl shadow-red-600/10 flex items-center justify-center gap-2 group"
+            >
+              {loading ? (
+                <Loader2 className="animate-spin" />
+              ) : (
+                isRegisterMode ? "CREAR CUENTA" : "INICIAR SESIÓN"
+              )}
               {!loading && <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />}
             </button>
 
-            <button type="button" onClick={() => { setIsRegisterMode(!isRegisterMode); setError(''); }} className="w-full text-center text-xs font-bold text-slate-400 hover:text-red-600 transition-colors uppercase tracking-widest">
-              {isRegisterMode ? '¿Ya tienes cuenta? Entra aquí' : '¿No tienes cuenta? Regístrate'}
+            <button
+              type="button"
+              onClick={() => {
+                setIsRegisterMode(!isRegisterMode);
+                setError("");
+              }}
+              className="w-full text-center text-xs font-bold text-slate-400 hover:text-red-600 transition-colors uppercase tracking-widest"
+            >
+              {isRegisterMode ? "¿Ya tienes cuenta? Entra aquí" : "¿No tienes cuenta? Regístrate"}
             </button>
           </form>
         </div>
@@ -269,9 +306,3 @@ export function LoginScreen() {
     </div>
   );
 }
-
-
-
-
-
-

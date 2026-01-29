@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { VehicleDetailsDialog } from './VehicleDetailsDialog.tsx';
-import { useFavorites } from './FavoritesContext.tsx'; 
+//import { useFavorites } from './FavoritesContext.tsx'; 
 import { useAuth } from '../auth/AuthContext.tsx';
 import { 
   Gauge, Calendar, Heart, 
@@ -26,9 +26,9 @@ export function VehicleCard({
   onStartSale 
 }: VehicleCardProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const { isFavorite, toggleFavorite } = useFavorites(); // ✅ Hook corregido
+  //const { isFavorite, toggleFavorite } = useFavorites(); // ✅ Hook corregido
   const { user } = useAuth();
-  const favorite = isFavorite(vehiculo.id);
+  //const favorite = isFavorite(vehiculo.id);
 
   // --- EXTRACCIÓN DE DATOS RELACIONALES (NestJS JSON) ---
   const infoVersion = vehiculo.version;
@@ -43,11 +43,11 @@ export function VehicleCard({
           <div className="flex flex-col md:flex-row">
             <div className="relative overflow-hidden md:w-80 aspect-video md:aspect-auto bg-slate-200">
               <button
-                onClick={() => toggleFavorite(vehiculo.id)}
+                //onClick={() => toggleFavorite(vehiculo.id)}
                 className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm p-2 rounded-full hover:bg-white transition-colors"
               >
                 <Heart 
-                  className={`w-5 h-5 ${favorite ? 'fill-red-600 text-red-600' : 'text-slate-600'}`}
+                 // className={`w-5 h-5 ${favorite ? 'fill-red-600 text-red-600' : 'text-slate-600'}`}
                 />
               </button>
             </div>

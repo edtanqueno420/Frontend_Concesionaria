@@ -1,5 +1,6 @@
 import { Phone, Mail, LogOut, User as UserIcon, Home, Users } from 'lucide-react';
-import { useAuth } from './AuthContext';
+import { useAuth } from '../auth/AuthContext';
+//import { SucursalSelector } from './SucursalSelector';
 import { YECLogo } from './YECLogo';
 import { useState } from 'react';
 

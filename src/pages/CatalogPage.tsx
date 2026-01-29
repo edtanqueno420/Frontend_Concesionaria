@@ -134,12 +134,4 @@ export function CatalogPage() {
       </main>
     </div>
   );
-}           
-
-
-
-
-
-
-
-
+}

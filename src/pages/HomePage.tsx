@@ -37,7 +37,7 @@ export function HomePage() {
           backgroundPosition: "center",
         }}
       >
-        {/* Overlay */}
+        {/* Overlay (más suave para que se vea la foto) */}
         <div className="absolute inset-0 bg-black/40" />
 
         <div className="relative px-8 py-20 md:py-28 text-center">

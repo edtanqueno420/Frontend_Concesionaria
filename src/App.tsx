@@ -6,6 +6,8 @@ import { useAuth } from "./auth/AuthContext";
 import { CatalogPage } from "./pages/CatalogPage";
 import { TestDrivePage } from "./pages/TestDrivePage";
 import { LandingPage } from "./pages/LandingPage";
+import AdminDashboardPage from "./pages/admin/AdminDashboardPage";
+import { RequireAdmin } from "./components/RequireAdmin";
 
 function App() {
   const { isAuthenticated } = useAuth();
@@ -16,6 +18,16 @@ function App() {
   <Route path="/" element={<LandingPage />} />
 
       <Route path="/login" element={<LoginScreen />} />
+
+      {/* 🔐 ADMIN */}
+      <Route
+        path="/admin"
+        element={
+          <RequireAdmin>
+            <AdminDashboardPage />
+          </RequireAdmin>
+        }
+      />
 
       {isAuthenticated() ? (
         <Route element={<MainLayout />}>

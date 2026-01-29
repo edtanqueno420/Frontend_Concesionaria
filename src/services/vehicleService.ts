@@ -1,7 +1,7 @@
 import axios from 'axios';
 import type { Vehiculo } from '../types';
 
-const API_URL = 'http://localhost:3000';
+const API_URL = 'https://yec-concesionario-api.desarrollo-software.xyz';
 
 export const vehicleService = {
   getAll: async (): Promise<Vehiculo[]> => {

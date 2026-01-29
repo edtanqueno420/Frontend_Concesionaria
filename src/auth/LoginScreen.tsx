@@ -1,16 +1,16 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
-import { useAuth } from '../components/AuthContext'; // 👈 AÑADIDO
-import { 
-  Car, Mail, Lock, AlertCircle, Eye, EyeOff, Loader2, 
+import { useAuth } from '../auth/AuthContext';
+import {
+  Car, Mail, Lock, AlertCircle, Eye, EyeOff, Loader2,
   User, ArrowRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function LoginScreen() {
   const navigate = useNavigate();
-  const { login } = useAuth(); // 👈 AÑADIDO
+  const { login } = useAuth();
 
   // --- UI STATES ---
   const [isRegisterMode, setIsRegisterMode] = useState(false);
@@ -75,25 +75,42 @@ export function LoginScreen() {
         // 🔐 LOGIN
         const res = await api.post('/auth/login', { email, password });
 
-        // ⬇️ CLAVE: guardar en AuthContext
-        login(res.data.user);
+        // ✅ si tu backend responde así:
+        // res.data = { access_token: "...", user: { nombre, rol, ... } }
 
-        // opcional (si usas token)
-        localStorage.setItem('token', res.data.access_token);
+        const user = res.data?.user;
+        const token = res.data?.access_token;
 
+        if (!user) throw new Error('Respuesta inválida: falta user');
+        if (!token) throw new Error('Respuesta inválida: falta access_token');
+
+        // ⬇️ guardar en AuthContext
+        login(user);
+
+        // ✅ guardar token/rol para proteger rutas luego
+        localStorage.setItem('token', token);
+        localStorage.setItem('role', user.rol);
+
+        // recordar email
         if (rememberMe) {
           localStorage.setItem('yec_remembered_email', email);
         } else {
           localStorage.removeItem('yec_remembered_email');
         }
 
-        toast.success(`¡Bienvenido, ${res.data.user.nombre}!`);
+        toast.success(`¡Bienvenido, ${user.nombre}!`);
 
-        navigate(
-          res.data.user.rol === 'cliente'
-            ? '/home'
-            : '/marcas'
-        );
+        // ✅ REDIRECCIÓN CORRECTA
+        // admin -> /admin
+        // cliente -> /home
+        // otro -> /marcas (fallback)
+        if (user.rol === 'admin') {
+          navigate('/admin', { replace: true });
+        } else if (user.rol === 'cliente') {
+          navigate('/home', { replace: true });
+        } else {
+          navigate('/marcas', { replace: true });
+        }
       }
     } catch (err: any) {
       const msg =
@@ -108,8 +125,6 @@ export function LoginScreen() {
   };
 
   // 👇 TODO TU JSX SE QUEDA IGUAL (no lo toqué)
-
-
   const getPasswordStrengthColor = () => {
     if (passwordStrength === 0) return 'bg-gray-200';
     if (passwordStrength <= 25) return 'bg-red-500';
@@ -156,13 +171,13 @@ export function LoginScreen() {
               <div className="grid grid-cols-1 gap-4">
                 <div className="relative">
                   <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <input 
-                    type="text" 
-                    placeholder="Nombre Completo" 
-                    required 
-                    className="w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-red-600/20 border border-transparent focus:border-red-600 transition-all text-sm font-bold" 
-                    value={fullName} 
-                    onChange={e => setFullName(e.target.value)} 
+                  <input
+                    type="text"
+                    placeholder="Nombre Completo"
+                    required
+                    className="w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none focus:ring-2 focus:ring-red-600/20 border border-transparent focus:border-red-600 transition-all text-sm font-bold"
+                    value={fullName}
+                    onChange={e => setFullName(e.target.value)}
                   />
                 </div>
               </div>
@@ -170,25 +185,25 @@ export function LoginScreen() {
 
             <div className="relative">
               <Mail className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input 
-                type="email" 
-                placeholder="Email" 
-                required 
-                className={`w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none border transition-all text-sm font-bold ${!emailValid ? 'border-red-500' : 'border-transparent focus:border-red-600'}`} 
-                value={email} 
-                onChange={e => setEmail(e.target.value)} 
+              <input
+                type="email"
+                placeholder="Email"
+                required
+                className={`w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none border transition-all text-sm font-bold ${!emailValid ? 'border-red-500' : 'border-transparent focus:border-red-600'}`}
+                value={email}
+                onChange={e => setEmail(e.target.value)}
               />
             </div>
 
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-              <input 
-                type={showPassword ? 'text' : 'password'} 
-                placeholder="Contraseña" 
-                required 
-                className="w-full pl-11 pr-12 py-3 bg-slate-100 rounded-xl outline-none border border-transparent focus:border-red-600 transition-all text-sm font-bold" 
-                value={password} 
-                onChange={e => setPassword(e.target.value)} 
+              <input
+                type={showPassword ? 'text' : 'password'}
+                placeholder="Contraseña"
+                required
+                className="w-full pl-11 pr-12 py-3 bg-slate-100 rounded-xl outline-none border border-transparent focus:border-red-600 transition-all text-sm font-bold"
+                value={password}
+                onChange={e => setPassword(e.target.value)}
               />
               <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
@@ -198,8 +213,8 @@ export function LoginScreen() {
             {isRegisterMode && password && (
               <div className="space-y-1">
                 <div className="w-full bg-gray-200 rounded-full h-1.5">
-                  <div 
-                    className={`h-1.5 rounded-full ${getPasswordStrengthColor()}`} 
+                  <div
+                    className={`h-1.5 rounded-full ${getPasswordStrengthColor()}`}
                     style={{ width: `${Math.max(5, passwordStrength)}%` }}
                   ></div>
                 </div>
@@ -214,13 +229,13 @@ export function LoginScreen() {
             {isRegisterMode && (
               <div className="relative">
                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <input 
-                  type="password" 
-                  placeholder="Confirmar Contraseña" 
-                  required 
-                  className="w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none border border-transparent focus:border-red-600 transition-all text-sm font-bold" 
-                  value={confirmPassword} 
-                  onChange={e => setConfirmPassword(e.target.value)} 
+                <input
+                  type="password"
+                  placeholder="Confirmar Contraseña"
+                  required
+                  className="w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none border border-transparent focus:border-red-600 transition-all text-sm font-bold"
+                  value={confirmPassword}
+                  onChange={e => setConfirmPassword(e.target.value)}
                 />
               </div>
             )}
@@ -245,7 +260,7 @@ export function LoginScreen() {
               {!loading && <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />}
             </button>
 
-            <button type="button" onClick={() => {setIsRegisterMode(!isRegisterMode); setError('')}} className="w-full text-center text-xs font-bold text-slate-400 hover:text-red-600 transition-colors uppercase tracking-widest">
+            <button type="button" onClick={() => { setIsRegisterMode(!isRegisterMode); setError(''); }} className="w-full text-center text-xs font-bold text-slate-400 hover:text-red-600 transition-colors uppercase tracking-widest">
               {isRegisterMode ? '¿Ya tienes cuenta? Entra aquí' : '¿No tienes cuenta? Regístrate'}
             </button>
           </form>

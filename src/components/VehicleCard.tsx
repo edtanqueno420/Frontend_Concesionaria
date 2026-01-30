@@ -5,7 +5,7 @@ import { useAuth } from "../auth/AuthContext";
 import { Gauge, Calendar, Heart, ShoppingCart, Eye } from "lucide-react";
 
 interface VehicleCardProps {
-  vehiculo: any;
+  vehiculo: any; // ahora puede traer vehiculo.imagenUrl
   isComparing: boolean;
   onToggleCompare: () => void;
   canAddToCompare: boolean;
@@ -47,6 +47,9 @@ export function VehicleCard({
 
   const precioFinal = Number(vehiculo?.precio_final ?? 0);
 
+  // ✅ URL de imagen que viene desde /galeria (la agregamos en HomePage como imagenUrl)
+  const imagenUrl: string | null = vehiculo?.imagenUrl ?? null;
+
   const handleToggleFavorite = () => {
     if (!vehiculoId) return; // evita crash si no hay id
     toggleFavorite(vehiculoId);
@@ -59,6 +62,19 @@ export function VehicleCard({
         <div className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl transition-shadow border-2 border-slate-200">
           <div className="flex flex-col md:flex-row">
             <div className="relative overflow-hidden md:w-80 aspect-video md:aspect-auto bg-slate-200">
+              {/* ✅ Imagen */}
+              {imagenUrl ? (
+                <img
+                  src={imagenUrl}
+                  alt="vehiculo"
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                  onError={(e) => {
+                    (e.currentTarget as HTMLImageElement).style.display = "none";
+                  }}
+                />
+              ) : null}
+
               <button
                 onClick={handleToggleFavorite}
                 type="button"
@@ -174,7 +190,21 @@ export function VehicleCard({
   return (
     <>
       <div className="rounded-xl overflow-hidden shadow-lg hover:shadow-2xl transition-all group bg-white border border-gray-100">
-        <div className="relative aspect-[4/5] bg-gradient-to-br from-slate-100 to-slate-200">
+        {/* ✅ Ahora mostramos imagen si existe */}
+        <div className="relative aspect-[4/5] bg-slate-200">
+          {imagenUrl ? (
+            <img
+              src={imagenUrl}
+              alt="vehiculo"
+              className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
+              style={{ objectPosition: vehiculo?.imageFocus ?? "50% 50%" }}
+              loading="lazy"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).style.display = "none";
+              }}
+            />
+          ) : null}
+
           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
 
           {/* ❤️ Favorito en grid también */}

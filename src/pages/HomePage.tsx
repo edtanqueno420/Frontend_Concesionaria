@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { VehicleCard } from "../components/VehicleCard";
-import { vehicleService } from "../services/vehicleService";
 import { TrendingUp, Search, Award, Shield, Users } from "lucide-react";
 import type { Vehiculo } from "../types";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
 import edificio from "../assets/edificio.png";
+import { getGalerias } from "../services/galeriaService";
 
 export function HomePage() {
   const navigate = useNavigate();
@@ -14,12 +14,36 @@ export function HomePage() {
   useEffect(() => {
     async function fetchVehicles() {
       try {
-        const data = await vehicleService.getAll();
-        setVehiculos(data);
+        const galerias = await getGalerias();
+
+        const vehiculosConImagen = (galerias ?? [])
+          .map((g: any) => {
+            const vehiculo = g?.vehiculoData;
+            if (!vehiculo) return null;
+
+            const imagenPrincipal =
+              g?.imagenes?.find((i: any) => i?.principal)?.url ??
+              g?.imagenes?.[0]?.url ??
+              null;
+
+            return {
+              ...vehiculo,
+              imagenUrl: imagenPrincipal,
+              imageFocus:
+                vehiculo.id === 1 ? "20% 50%" : // Porsche: más a la izquierda
+                  vehiculo.id === 2 ? "60% 50%" : // Yaris: más al centro/derecha
+                    "50% 55%",
+              // ✅ campo extra para la card
+            };
+          })
+          .filter(Boolean);
+
+        setVehiculos(vehiculosConImagen as Vehiculo[]);
       } catch (err) {
-        console.error("Error cargando vehículos", err);
+        console.error("Error cargando galerías/vehículos", err);
       }
     }
+
     fetchVehicles();
   }, []);
 
@@ -37,7 +61,6 @@ export function HomePage() {
           backgroundPosition: "center",
         }}
       >
-        {/* Overlay (más suave para que se vea la foto) */}
         <div className="absolute inset-0 bg-black/40" />
 
         <div className="relative px-8 py-20 md:py-28 text-center">
@@ -46,10 +69,10 @@ export function HomePage() {
           </h1>
 
           <p className="text-xl text-red-300 mb-8 max-w-2xl mx-auto font-medium">
-            Encuentra el vehículo perfecto para ti con las mejores opciones de financiamiento en Ecuador
+            Encuentra el vehículo perfecto para ti con las mejores opciones de
+            financiamiento en Ecuador
           </p>
 
-          {/* BOTONES */}
           <div className="flex flex-col sm:flex-row justify-center gap-4">
             <Button
               size="lg"
@@ -78,7 +101,9 @@ export function HomePage() {
             <Award className="w-8 h-8 text-red-600" />
           </div>
           <h3 className="text-3xl font-bold text-slate-900 mb-2">+15 Años</h3>
-          <p className="text-slate-600 font-medium">De experiencia en el mercado</p>
+          <p className="text-slate-600 font-medium">
+            De experiencia en el mercado
+          </p>
         </div>
 
         <div className="bg-white rounded-xl shadow-lg p-6 text-center hover:shadow-xl transition-shadow border-2 border-slate-200">
@@ -94,7 +119,9 @@ export function HomePage() {
             <Shield className="w-8 h-8 text-red-600" />
           </div>
           <h3 className="text-3xl font-bold text-slate-900 mb-2">Garantía</h3>
-          <p className="text-slate-600 font-medium">En todos nuestros vehículos</p>
+          <p className="text-slate-600 font-medium">
+            En todos nuestros vehículos
+          </p>
         </div>
       </section>
 
@@ -106,10 +133,10 @@ export function HomePage() {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {masVendidos.map((v) => (
-            <VehicleCard 
-              key={v.id} 
-              vehiculo={v} 
+          {masVendidos.map((v: any) => (
+            <VehicleCard
+              key={v.id}
+              vehiculo={v}
               isComparing={false}
               onToggleCompare={() => {}}
               canAddToCompare={false}
@@ -127,10 +154,10 @@ export function HomePage() {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {masBuscados.map((v) => (
-            <VehicleCard 
-              key={v.id} 
-              vehiculo={v} 
+          {masBuscados.map((v: any) => (
+            <VehicleCard
+              key={v.id}
+              vehiculo={v}
               isComparing={false}
               onToggleCompare={() => {}}
               canAddToCompare={false}
@@ -142,10 +169,3 @@ export function HomePage() {
     </div>
   );
 }
-
-
-
-
-
-
-

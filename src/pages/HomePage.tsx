@@ -47,8 +47,8 @@ export function HomePage() {
     fetchVehicles();
   }, []);
 
-  const masVendidos = vehiculos.slice(0, 3);
-  const masBuscados = vehiculos.slice(3, 6);
+  const masVendidos = vehiculos.slice(0, Math.min(3, vehiculos.length));
+  const masBuscados = vehiculos.slice(Math.min(3, vehiculos.length), Math.min(6, vehiculos.length));
 
   return (
     <div className="space-y-16">
@@ -133,16 +133,22 @@ export function HomePage() {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {masVendidos.map((v: any) => (
-            <VehicleCard
-              key={v.id}
-              vehiculo={v}
-              isComparing={false}
-              onToggleCompare={() => {}}
-              canAddToCompare={false}
-              viewMode="grid"
-            />
-          ))}
+          {masVendidos.length > 0 ? (
+            masVendidos.map((v: any) => (
+              <VehicleCard
+                key={v.id}
+                vehiculo={v}
+                isComparing={false}
+                onToggleCompare={() => {}}
+                canAddToCompare={false}
+                viewMode="grid"
+              />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-8">
+              <p className="text-slate-500 text-lg">Cargando vehículos disponibles...</p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -154,16 +160,22 @@ export function HomePage() {
         </h2>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {masBuscados.map((v: any) => (
-            <VehicleCard
-              key={v.id}
-              vehiculo={v}
-              isComparing={false}
-              onToggleCompare={() => {}}
-              canAddToCompare={false}
-              viewMode="grid"
-            />
-          ))}
+          {masBuscados.length > 0 ? (
+            masBuscados.map((v: any) => (
+              <VehicleCard
+                key={v.id}
+                vehiculo={v}
+                isComparing={false}
+                onToggleCompare={() => {}}
+                canAddToCompare={false}
+                viewMode="grid"
+              />
+            ))
+          ) : (
+            <div className="col-span-full text-center py-8">
+              <p className="text-slate-500 text-lg">Cargando más vehículos disponibles...</p>
+            </div>
+          )}
         </div>
       </section>
     </div>

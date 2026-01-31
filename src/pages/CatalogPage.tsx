@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from 'react';
 import type { Vehiculo } from '../types';
-import { vehicleService } from '../services/vehicleService';
+import { getGalerias } from '../services/galeriaService';
 import { VehicleGrid } from '../components/VehicleGrid';
 import { Search, Filter, RotateCcw } from 'lucide-react';
 
@@ -15,15 +15,40 @@ export function CatalogPage() {
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
   useEffect(() => {
-    vehicleService.getAll()
-      .then(data => {
-        setVehiculos(data);
+    async function fetchVehicles() {
+      try {
+        const galerias = await getGalerias();
+
+        const vehiculosConImagen = (galerias ?? [])
+          .map((g: any) => {
+            const vehiculo = g?.vehiculoData;
+            if (!vehiculo) return null;
+
+            const imagenPrincipal =
+              g?.imagenes?.find((i: any) => i?.principal)?.url ??
+              g?.imagenes?.[0]?.url ??
+              null;
+
+            return {
+              ...vehiculo,
+              imagenUrl: imagenPrincipal,
+              imageFocus:
+                vehiculo.id === 1 ? "20% 50%" : // Porsche: más a la izquierda
+                  vehiculo.id === 2 ? "60% 50%" : // Yaris: más al centro/derecha
+                    "50% 55%",
+            };
+          })
+          .filter(Boolean);
+
+        setVehiculos(vehiculosConImagen as Vehiculo[]);
         setLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error("Error al cargar el catálogo:", err);
         setLoading(false);
-      });
+      }
+    }
+
+    fetchVehicles();
   }, []);
 
   // LÓGICA DE FILTRADO 

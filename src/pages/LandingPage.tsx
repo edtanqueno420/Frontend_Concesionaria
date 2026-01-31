@@ -1,18 +1,51 @@
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Car, ArrowRight, Phone, Mail, MapPin, Star, Shield, TrendingUp, Users } from "lucide-react";
 import { YECLogo } from "../components/YECLogo";
 import heroCar from "../assets/hero-car.png";
+import { getGalerias } from "../services/galeriaService";
 
 export function LandingPage() {
   const navigate = useNavigate();
+  const [vehiculosDestacados, setVehiculosDestacados] = useState<any[]>([]);
 
   const onRegister = () => navigate("/login"); // o "/register" si tienes esa ruta
 
-  const vehiculosDestacados = [
-    { marca: "Toyota", modelo: "Camry 2023", precio: 28500, descripcion: "Elegancia y tecnología" },
-    { marca: "Honda", modelo: "CR-V 2024", precio: 35200, descripcion: "SUV híbrido premium" },
-    { marca: "Porsche", modelo: "911 Carrera", precio: 125000, descripcion: "Potencia y lujo" },
-  ];
+  useEffect(() => {
+    async function fetchVehicles() {
+      try {
+        const galerias = await getGalerias();
+
+        const vehiculosConImagen = (galerias ?? [])
+          .map((g: any) => {
+            const vehiculo = g?.vehiculoData;
+            if (!vehiculo) return null;
+
+            const imagenPrincipal =
+              g?.imagenes?.find((i: any) => i?.principal)?.url ??
+              g?.imagenes?.[0]?.url ??
+              null;
+
+            return {
+              ...vehiculo,
+              imagenUrl: imagenPrincipal,
+              imageFocus:
+                vehiculo.id === 1 ? "20% 50%" : // Porsche: más a la izquierda
+                  vehiculo.id === 2 ? "60% 50%" : // Yaris: más al centro/derecha
+                    "50% 55%",
+            };
+          })
+          .filter(Boolean)
+          .slice(0, 3); // Solo los primeros 3 para destacados
+
+        setVehiculosDestacados(vehiculosConImagen);
+      } catch (err) {
+        console.error("Error cargando vehículos destacados:", err);
+      }
+    }
+
+    fetchVehicles();
+  }, []);
 
   const caracteristicas = [
     { icon: Shield, titulo: "Garantía", descripcion: "Vehículos revisados y con respaldo." },
@@ -93,17 +126,64 @@ export function LandingPage() {
 
       {/* DESTACADOS */}
       <section className="py-16 bg-slate-50">
-        <div className="container mx-auto px-4 grid md:grid-cols-3 gap-8">
-          {vehiculosDestacados.map((v, i) => (
-            <div key={i} className="bg-white p-6 rounded-xl shadow">
-              <Car className="w-16 h-16 text-slate-400 mb-4" />
-              <h3 className="text-xl font-bold">
-                {v.marca} {v.modelo}
-              </h3>
-              <p className="text-slate-600">{v.descripcion}</p>
-              <p className="text-red-600 text-2xl font-bold mt-4">${v.precio.toLocaleString()}</p>
-            </div>
-          ))}
+        <div className="container mx-auto px-4">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-slate-900 mb-4">Vehículos Destacados</h2>
+            <p className="text-slate-600 text-lg">Los mejores autos disponibles ahora</p>
+          </div>
+          <div className="grid md:grid-cols-3 gap-8">
+            {vehiculosDestacados.length > 0 ? (
+              vehiculosDestacados.map((v) => (
+                <div key={v.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all">
+                  {/* Imagen del vehículo */}
+                  <div className="relative aspect-[4/3] bg-slate-200">
+                    {v.imagenUrl ? (
+                      <img
+                        src={v.imagenUrl}
+                        alt={`${v.version?.modelo?.marca?.nombre} ${v.version?.modelo?.nombre}`}
+                        className="w-full h-full object-cover"
+                        style={{ objectPosition: v.imageFocus ?? "50% 50%" }}
+                        onError={(e) => {
+                          (e.currentTarget as HTMLImageElement).style.display = "none";
+                        }}
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center h-full">
+                        <Car className="w-16 h-16 text-slate-400" />
+                      </div>
+                    )}
+                    <div className="absolute top-3 left-3">
+                      <span className="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded-full shadow-lg">
+                        {v.version?.anio ?? "—"}
+                      </span>
+                    </div>
+                  </div>
+                  
+                  <div className="p-6">
+                    <h3 className="text-xl font-bold mb-2">
+                      {v.version?.modelo?.marca?.nombre} {v.version?.modelo?.nombre}
+                    </h3>
+                    <p className="text-slate-600 mb-4">
+                      {v.version?.motor ?? "Vehículo en excelente estado"}
+                    </p>
+                    <p className="text-red-600 text-2xl font-bold">${Number(v.precio_final).toLocaleString()}</p>
+                  </div>
+                </div>
+              ))
+            ) : (
+              // Mostrar placeholders mientras cargan
+              [1, 2, 3].map((i) => (
+                <div key={i} className="bg-white p-6 rounded-xl shadow animate-pulse">
+                  <div className="w-full h-40 bg-slate-200 rounded-lg mb-4 flex items-center justify-center">
+                    <Car className="w-16 h-16 text-slate-400" />
+                  </div>
+                  <div className="h-6 bg-slate-200 rounded mb-2"></div>
+                  <div className="h-4 bg-slate-200 rounded mb-4"></div>
+                  <div className="h-8 bg-slate-200 rounded"></div>
+                </div>
+              ))
+            )}
+          </div>
         </div>
       </section>
 

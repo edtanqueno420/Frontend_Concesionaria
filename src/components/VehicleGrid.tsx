@@ -50,6 +50,7 @@ export function VehicleGrid({ vehiculos, compareList, toggleCompare, viewMode, o
             canAddToCompare={compareList.length < 3 || compareList.includes(vehiculo.id)}
             viewMode={viewMode}
             onStartSale={onStartSale}
+            compareList={compareList}
           />
         ))}
       </div>
@@ -93,6 +94,7 @@ export function VehicleGrid({ vehiculos, compareList, toggleCompare, viewMode, o
               canAddToCompare={compareList.length < 3 || compareList.includes(vehiculo.id)}
               viewMode="grid"
               onStartSale={onStartSale}
+              compareList={compareList}
             />
           </div>
         ))}

@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { VehicleCard } from "../components/VehicleCard";
-import { CompareDialog } from "../components/CompareDialog";
-import { TrendingUp, Search, Award, Shield, Users, GitCompare } from "lucide-react";
+import { TrendingUp, Search, Award, Shield, Users } from "lucide-react";
 import type { Vehiculo } from "../types";
 import { useNavigate } from "react-router-dom";
 import { Button } from "../components/ui/button";
@@ -12,7 +11,6 @@ export function HomePage() {
   const navigate = useNavigate();
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   const [compareList, setCompareList] = useState<number[]>([]);
-  const [compareDialogOpen, setCompareDialogOpen] = useState(false);
 
   const toggleCompare = (id: number) => {
     setCompareList(prev => {
@@ -195,25 +193,6 @@ export function HomePage() {
           )}
         </div>
       </section>
-
-      {/* Botón flotante de comparación */}
-      {compareList.length >= 2 && (
-        <button
-          onClick={() => setCompareDialogOpen(true)}
-          className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-full shadow-2xl transition-all flex items-center gap-3 z-40 font-bold"
-        >
-          <GitCompare className="w-6 h-6" />
-          Comparar ({compareList.length})
-        </button>
-      )}
-
-      {/* Diálogo de comparación */}
-      <CompareDialog
-        open={compareDialogOpen}
-        onOpenChange={setCompareDialogOpen}
-        compareList={compareList}
-        vehicles={vehiculos}
-      />
     </div>
   );
 }

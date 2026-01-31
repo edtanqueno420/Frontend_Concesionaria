@@ -8,9 +8,8 @@ import {
   ShoppingCart,
   FileText,
   Bell,
-  Search,
   ChevronDown,
-  Plus,
+  LogOut,
 } from "lucide-react";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { YECLogo } from "../../components/YECLogo";
@@ -29,7 +28,6 @@ const menu: MenuItem[] = [
   { label: "Usuarios", icon: Users, path: "/admin/usuarios" },
   { label: "Ventas", icon: ShoppingCart, path: "/admin/ventas" },
   { label: "Reportes", icon: FileText, path: "/admin/reportes" },
-  
 ];
 
 export default function AdminShell() {
@@ -39,6 +37,41 @@ export default function AdminShell() {
 
   function go(path: string) {
     navigate(path);
+  }
+
+  // ✅ 1) Sacar nombre del usuario logeado (localStorage)
+  // Cambia la key si tú guardas con otra (por ejemplo: "auth", "userData", etc.)
+  const authRaw =
+    localStorage.getItem("user") || localStorage.getItem("authUser") || localStorage.getItem("auth");
+
+  let userName = "Usuario";
+  let userRole = "";
+
+
+  try {
+    const parsed = authRaw ? JSON.parse(authRaw) : null;
+
+    // soporta varias formas comunes:
+    // { nombre, apellido, rol, email }
+    // { user: { nombre, ... } }
+    const u = parsed?.user ?? parsed;
+
+    if (u?.nombre) userName = `${u.nombre}${u.apellido ? " " + u.apellido : ""}`;
+    if (u?.rol) userRole = String(u.rol);
+  } catch {
+    // si no es JSON, no pasa nada
+  }
+
+  // ✅ 2) Cerrar sesión
+  function logout() {
+    // Borra lo típico (ajusta a tu proyecto)
+    localStorage.removeItem("token");
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("user");
+    localStorage.removeItem("authUser");
+    localStorage.removeItem("auth");
+
+    navigate("/login");
   }
 
   return (
@@ -79,11 +112,9 @@ export default function AdminShell() {
 
           <div className="p-4 border-t border-white/10">
             <div className="bg-white/5 rounded-xl p-3">
-              <p className="text-sm font-semibold">Admin</p>
-              <p className="text-xs text-white/60">admin@yecmotors.ec</p>
               <button
                 className="mt-3 w-full bg-white text-slate-900 rounded-lg py-2 text-sm font-semibold hover:bg-slate-100"
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/home")}
               >
                 Ir al sitio
               </button>
@@ -96,39 +127,38 @@ export default function AdminShell() {
           {/* TOPBAR */}
           <header className="sticky top-0 z-40 bg-white border-b border-slate-200">
             <div className="h-16 px-4 md:px-6 flex items-center justify-between gap-3">
+              {/* ✅ Quitamos buscador de la izquierda */}
               <div className="flex items-center gap-3">
                 <div className="md:hidden flex items-center gap-2">
                   <YECLogo className="w-9 h-9" />
                   <span className="font-bold">YEC Admin</span>
                 </div>
-
-                <div className="hidden md:flex items-center gap-2 bg-slate-100 rounded-xl px-3 py-2 w-[420px]">
-                  <Search className="w-4 h-4 text-slate-500" />
-                  <input
-                    className="bg-transparent outline-none text-sm w-full"
-                    placeholder="Buscar vehículos, clientes, ventas..."
-                  />
-                </div>
               </div>
 
               <div className="flex items-center gap-2">
-                <button className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800">
-                  <Plus className="w-4 h-4" />
-                  Nuevo
-                  <ChevronDown className="w-4 h-4 opacity-80" />
-                </button>
-
                 <button className="p-2 rounded-lg hover:bg-slate-100">
                   <Bell className="w-5 h-5 text-slate-700" />
                 </button>
 
+                {/* ✅ Botón cerrar sesión */}
+                <button
+                  onClick={logout}
+                  className="hidden sm:inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700"
+                >
+                  <LogOut className="w-4 h-4" />
+                  Cerrar sesión
+                </button>
+
+                {/* Usuario */}
                 <div className="flex items-center gap-2 pl-2">
                   <div className="w-9 h-9 rounded-full bg-red-600 text-white grid place-items-center font-bold">
-                    A
+                    {userName?.[0]?.toUpperCase() || "U"}
                   </div>
                   <div className="hidden sm:block leading-4">
-                    <p className="text-sm font-semibold text-slate-900">Admin</p>
-                    <p className="text-xs text-slate-500">Rol: administrador</p>
+                    <p className="text-sm font-semibold text-slate-900">{userName}</p>
+                    <p className="text-xs text-slate-500">
+                      {userRole ? `Rol: ${userRole}` : "Rol: —"}
+                    </p>
                   </div>
                   <ChevronDown className="w-4 h-4 text-slate-500" />
                 </div>

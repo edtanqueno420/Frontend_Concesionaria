@@ -73,9 +73,6 @@ export default function AdminDashboardPage() {
           <p className="text-slate-600">Resumen general del sistema</p>
         </div>
         <div className="flex gap-2">
-          <button className="px-4 py-2 rounded-lg bg-white border border-slate-200 text-sm font-semibold hover:bg-slate-50">
-            Exportar
-          </button>
           <button className="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700">
             Acciones
           </button>

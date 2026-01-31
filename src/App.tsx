@@ -10,6 +10,7 @@ import { useAuth } from "./auth/AuthContext";
 import { RequireAdmin } from "./components/RequireAdmin";
 import { RequireCliente } from "./components/RequireCliente";
 import { RequiereVendedor } from "./components/RequiereVendedor";
+import { RequireAuth } from "./components/RequireAuth"; // ✅ NUEVO
 import VendedorPanelPage from "./pages/vendedor/VendedorPanelPage";
 
 import AdminShell from "./pages/admin/AdminShell";
@@ -59,16 +60,35 @@ export default function App() {
       {/* LOGUEADOS con MainLayout */}
       {isAuthenticated() ? (
         <Route element={<MainLayout />}>
+          {/* ✅ /home ahora es para cualquier autenticado */}
           <Route
             path="/home"
             element={
-              <RequireCliente>
+              <RequireAuth>
                 <HomePage />
+              </RequireAuth>
+            }
+          />
+
+          <Route
+            path="/catalogo"
+            element={
+              <RequireAuth>
+                <CatalogPage />
+              </RequireAuth>
+            }
+          />
+
+          {/* Si TestDrive debe ser solo cliente, déjalo así */}
+          <Route
+            path="/vehiculo/:id/test-drive"
+            element={
+              <RequireCliente>
+                <TestDrivePage />
               </RequireCliente>
             }
           />
-          <Route path="/catalogo" element={<CatalogPage />} />
-          <Route path="/vehiculo/:id/test-drive" element={<TestDrivePage />} />
+
           <Route path="*" element={<Navigate to="/home" replace />} />
         </Route>
       ) : (

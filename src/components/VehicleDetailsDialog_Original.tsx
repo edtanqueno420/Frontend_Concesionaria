@@ -1,24 +1,21 @@
 import { useState } from 'react';
 import { 
   Calendar, Gauge, Fuel, Settings, Palette, 
-  Calculator, 
-  Car, RefreshCw, X, GitCompare
+  Mail, Phone, Calculator, 
+  Car, RefreshCw, X 
 } from 'lucide-react';
 
 import { TestDriveForm } from './TestDriveForm';
-import { SolicitudForm } from './SolicitudForm';
 
 
 interface VehicleDetailsDialogProps {
   vehiculo: any; 
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  compareList: number[];
-  onToggleCompare: (id: number) => void;
 }
 
-export function VehicleDetailsDialog({ vehiculo, open, onOpenChange, compareList, onToggleCompare }: VehicleDetailsDialogProps) {
-  const [showSolicitud, setShowSolicitud] = useState(false);
+export function VehicleDetailsDialog({ vehiculo, open, onOpenChange }: VehicleDetailsDialogProps) {
+  const [showCalculator, setShowCalculator] = useState(false);
   const [showTestDrive, setShowTestDrive] = useState(false);
   const valorRetoma = 0;
 
@@ -62,23 +59,6 @@ export function VehicleDetailsDialog({ vehiculo, open, onOpenChange, compareList
           <div className="p-6 space-y-6">
             {/* Imagen Principal */}
             <div className="relative overflow-hidden rounded-lg aspect-video bg-slate-200 border-2 border-slate-300 shadow-inner">
-              {vehiculo?.imagenUrl ? (
-                <img
-                  src={vehiculo.imagenUrl}
-                  alt={`${infoMarca?.nombre} ${infoModelo?.nombre} ${infoVersion?.anio}`}
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.currentTarget as HTMLImageElement).style.display = "none";
-                  }}
-                />
-              ) : (
-                <div className="flex items-center justify-center h-full text-slate-400">
-                  <div className="text-center">
-                    <Car className="w-16 h-16 mx-auto mb-2" />
-                    <p className="text-sm">Imagen no disponible</p>
-                  </div>
-                </div>
-              )}
             </div>
 
             {/* Badges de Estado */}
@@ -118,28 +98,27 @@ export function VehicleDetailsDialog({ vehiculo, open, onOpenChange, compareList
             </div>
 
             {/* Botones de Acción Estilo Figma */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 border-t-2 border-slate-300">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4 border-t-2 border-slate-300">
               <ActionButton icon={<Car />} label="Agendar Test Drive" primary onClick={() => setShowTestDrive(!showTestDrive)} />
-              <ActionButton icon={<Calculator />} label="Solicitudes" onClick={() => setShowSolicitud(!showSolicitud)} />
-              <ActionButton 
-                icon={<GitCompare />} 
-                label={compareList.includes(vehiculo?.id) ? "Comparando" : "Comparar"} 
-                onClick={() => onToggleCompare(vehiculo?.id)}
-                className={compareList.includes(vehiculo?.id) ? "bg-blue-600 text-white hover:bg-blue-700" : ""}
-              />
+              <ActionButton icon={<Calculator />} label="Calcular Financiamiento" onClick={() => setShowCalculator(!showCalculator)} />
             </div>
 
-            {/* Formulario de Solicitud */}
-            {showSolicitud && (
-              <div className="mt-4 p-4 bg-slate-50 rounded-lg border-2 border-slate-200">
-                <SolicitudForm vehiculo={vehiculo} />
-              </div>
-            )}
+            {/* Formulario de Test Drive */}
             {showTestDrive && (
               <div className="mt-4 p-4 bg-slate-50 rounded-lg border-2 border-slate-200">
                 <TestDriveForm vehiculo={vehiculo} />
               </div>
             )}
+
+            {/* Contacto Rápido */}
+            <div className="flex gap-3">
+              <button className="flex-1 px-4 py-3 border-2 border-slate-300 text-slate-700 hover:bg-slate-50 rounded-lg font-bold transition-colors flex items-center justify-center gap-2">
+                <Phone className="w-5 h-5" /> Llamar
+              </button>
+              <button className="flex-1 px-4 py-3 bg-red-600 text-white rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2">
+                <Mail className="w-5 h-5" /> Enviar Mensaje
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -158,12 +137,12 @@ const SpecItem = ({ icon, label, value }: { icon: any, label: string, value: any
   </div>
 );
 
-const ActionButton = ({ icon, label, primary, onClick, className }: { icon: any, label: string, primary?: boolean, onClick: () => void, className?: string }) => (
+const ActionButton = ({ icon, label, primary, onClick }: { icon: any, label: string, primary?: boolean, onClick: () => void }) => (
   <button 
     onClick={onClick}
     className={`px-4 py-3 rounded-lg font-bold shadow-lg transition-all flex items-center justify-center gap-2 ${
       primary ? 'bg-red-600 text-white hover:bg-red-700' : 'border-2 border-slate-300 text-slate-700 hover:bg-slate-50'
-    } ${className || ''}`}
+    }`}
   >
     {icon} {label}
   </button>

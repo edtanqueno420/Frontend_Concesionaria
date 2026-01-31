@@ -1,6 +1,16 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Car, ArrowRight, Phone, Mail, MapPin, Star, Shield, TrendingUp, Users } from "lucide-react";
+import {
+  Car,
+  ArrowRight,
+  Phone,
+  Mail,
+  MapPin,
+  Star,
+  Shield,
+  TrendingUp,
+  Users,
+} from "lucide-react";
 import { YECLogo } from "../components/YECLogo";
 import heroCar from "../assets/hero-car.png";
 import { getGalerias } from "../services/galeriaService";
@@ -30,9 +40,11 @@ export function LandingPage() {
               ...vehiculo,
               imagenUrl: imagenPrincipal,
               imageFocus:
-                vehiculo.id === 1 ? "20% 50%" : // Porsche: más a la izquierda
-                  vehiculo.id === 2 ? "60% 50%" : // Yaris: más al centro/derecha
-                    "50% 55%",
+                vehiculo.id === 1
+                  ? "20% 50%"
+                  : vehiculo.id === 2
+                  ? "60% 50%"
+                  : "50% 55%",
             };
           })
           .filter(Boolean)
@@ -48,15 +60,35 @@ export function LandingPage() {
   }, []);
 
   const caracteristicas = [
-    { icon: Shield, titulo: "Garantía", descripcion: "Vehículos revisados y con respaldo." },
-    { icon: TrendingUp, titulo: "Mejores precios", descripcion: "Ofertas y financiamiento flexible." },
-    { icon: Users, titulo: "Atención personalizada", descripcion: "Te acompañamos en todo el proceso." },
+    {
+      icon: Shield,
+      titulo: "Garantía",
+      descripcion: "Vehículos revisados y con respaldo.",
+    },
+    {
+      icon: TrendingUp,
+      titulo: "Mejores precios",
+      descripcion: "Ofertas y financiamiento flexible.",
+    },
+    {
+      icon: Users,
+      titulo: "Atención personalizada",
+      descripcion: "Te acompañamos en todo el proceso.",
+    },
     { icon: Car, titulo: "Variedad", descripcion: "Amplio catálogo de marcas y modelos." },
   ];
 
   const testimonios = [
-    { nombre: "Carlos M.", comentario: "Excelente servicio y muy rápido el proceso.", rating: 5 },
-    { nombre: "María P.", comentario: "Me ayudaron a elegir el auto perfecto para mi familia.", rating: 5 },
+    {
+      nombre: "Carlos M.",
+      comentario: "Excelente servicio y muy rápido el proceso.",
+      rating: 5,
+    },
+    {
+      nombre: "María P.",
+      comentario: "Me ayudaron a elegir el auto perfecto para mi familia.",
+      rating: 5,
+    },
     { nombre: "José L.", comentario: "Buen precio y atención súper amable.", rating: 4 },
   ];
 
@@ -105,19 +137,13 @@ export function LandingPage() {
               Las mejores marcas, los mejores precios en Ecuador
             </p>
 
-            <div className="flex justify-center gap-4">
+            {/* ✅ SOLO BOTÓN COMPRAR AHORA CENTRADO */}
+            <div className="flex justify-center">
               <button
                 onClick={() => navigate("/login")}
-                className="bg-red-600 px-8 py-4 rounded-lg font-bold flex items-center gap-2"
+                className="bg-red-600 px-8 py-4 rounded-lg font-bold flex items-center gap-2 hover:bg-red-700 transition-colors"
               >
                 Comprar Ahora <ArrowRight />
-              </button>
-
-              <button
-                onClick={() => navigate("/login")}
-                className="bg-white text-slate-900 px-8 py-4 rounded-lg font-bold"
-              >
-                Ver Catálogo
               </button>
             </div>
           </div>
@@ -131,10 +157,14 @@ export function LandingPage() {
             <h2 className="text-4xl font-bold text-slate-900 mb-4">Vehículos Destacados</h2>
             <p className="text-slate-600 text-lg">Los mejores autos disponibles ahora</p>
           </div>
+
           <div className="grid md:grid-cols-3 gap-8">
             {vehiculosDestacados.length > 0 ? (
               vehiculosDestacados.map((v) => (
-                <div key={v.id} className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all">
+                <div
+                  key={v.id}
+                  className="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all"
+                >
                   {/* Imagen del vehículo */}
                   <div className="relative aspect-[4/3] bg-slate-200">
                     {v.imagenUrl ? (
@@ -158,7 +188,7 @@ export function LandingPage() {
                       </span>
                     </div>
                   </div>
-                  
+
                   <div className="p-6">
                     <h3 className="text-xl font-bold mb-2">
                       {v.version?.modelo?.marca?.nombre} {v.version?.modelo?.nombre}
@@ -166,12 +196,14 @@ export function LandingPage() {
                     <p className="text-slate-600 mb-4">
                       {v.version?.motor ?? "Vehículo en excelente estado"}
                     </p>
-                    <p className="text-red-600 text-2xl font-bold">${Number(v.precio_final).toLocaleString()}</p>
+                    <p className="text-red-600 text-2xl font-bold">
+                      ${Number(v.precio_final).toLocaleString()}
+                    </p>
                   </div>
                 </div>
               ))
             ) : (
-              // Mostrar placeholders mientras cargan
+              // Placeholders mientras cargan
               [1, 2, 3].map((i) => (
                 <div key={i} className="bg-white p-6 rounded-xl shadow animate-pulse">
                   <div className="w-full h-40 bg-slate-200 rounded-lg mb-4 flex items-center justify-center">
@@ -246,8 +278,12 @@ export function LandingPage() {
       <section className="py-16 bg-slate-50">
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
-            <h2 className="text-4xl font-bold text-slate-900 mb-4">Lo Que Dicen Nuestros Clientes</h2>
-            <p className="text-slate-600 text-lg">Testimonios reales de clientes satisfechos</p>
+            <h2 className="text-4xl font-bold text-slate-900 mb-4">
+              Lo Que Dicen Nuestros Clientes
+            </h2>
+            <p className="text-slate-600 text-lg">
+              Testimonios reales de clientes satisfechos
+            </p>
           </div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -327,9 +363,3 @@ export function LandingPage() {
     </div>
   );
 }
-
-
-
-
-
-

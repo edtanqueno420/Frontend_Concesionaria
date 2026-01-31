@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom"; // ✅ useLocation
 import api from "../api/axios";
 import { useAuth } from "../auth/AuthContext";
 import {
@@ -18,9 +18,7 @@ import { toast } from "sonner";
 type RolNormalizado = "administrador" | "vendedor" | "cliente" | "otro";
 
 function normalizarRol(rol: unknown): RolNormalizado {
-  const r = String(rol ?? "")
-    .trim()
-    .toLowerCase();
+  const r = String(rol ?? "").trim().toLowerCase();
 
   if (r === "administrador" || r === "admin") return "administrador";
   if (r === "vendedor" || r === "seller") return "vendedor";
@@ -30,10 +28,14 @@ function normalizarRol(rol: unknown): RolNormalizado {
 
 export function LoginScreen() {
   const navigate = useNavigate();
+  const location = useLocation(); // ✅
   const { login } = useAuth();
 
-  // --- UI STATES ---
-  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  // ✅ Inicia en registro si vienes desde Landing con state.register
+  const [isRegisterMode, setIsRegisterMode] = useState(
+    Boolean((location.state as any)?.register)
+  );
+
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -41,7 +43,6 @@ export function LoginScreen() {
     !!localStorage.getItem("yec_remembered_email")
   );
 
-  // --- FORM STATES ---
   const [email, setEmail] = useState(
     () => localStorage.getItem("yec_remembered_email") || ""
   );
@@ -49,7 +50,6 @@ export function LoginScreen() {
   const [fullName, setFullName] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  // --- VALIDACIONES ---
   const [emailValid, setEmailValid] = useState(true);
   const [passwordStrength, setPasswordStrength] = useState(0);
 
@@ -67,7 +67,6 @@ export function LoginScreen() {
     setPasswordStrength(password ? strength : 0);
   }, [password]);
 
-  // --- SUBMIT ---
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
@@ -75,7 +74,8 @@ export function LoginScreen() {
 
     try {
       if (isRegisterMode) {
-        if (password !== confirmPassword) throw new Error("Las contraseñas no coinciden");
+        if (password !== confirmPassword)
+          throw new Error("Las contraseñas no coinciden");
 
         const [nombre, apellido = ""] = fullName.split(" ", 2);
 
@@ -99,34 +99,30 @@ export function LoginScreen() {
       if (!user) throw new Error("Respuesta inválida: falta user");
       if (!token) throw new Error("Respuesta inválida: falta access_token");
 
-      // ✅ Limpia valores anteriores (evita roles viejos)
       localStorage.removeItem("token");
       localStorage.removeItem("role");
 
-      // ✅ Guardar token / role (para guards)
       const rolNormalizado = normalizarRol(user.rol);
       localStorage.setItem("token", token);
       localStorage.setItem("role", rolNormalizado);
 
-      // ✅ AuthContext (para tu app)
       login(user);
 
-      // recordar email
       if (rememberMe) localStorage.setItem("yec_remembered_email", email);
       else localStorage.removeItem("yec_remembered_email");
 
       toast.success(`¡Bienvenido, ${user.nombre ?? "usuario"}!`);
 
-      // ✅ REDIRECCIÓN POR ROL
       if (rolNormalizado === "administrador") {
         navigate("/admin", { replace: true });
       } else if (rolNormalizado === "vendedor") {
         navigate("/vendedor", { replace: true });
       } else {
-        navigate("/home", { replace: true }); // cliente
+        navigate("/home", { replace: true });
       }
     } catch (err: any) {
-      const msg = err.response?.data?.message || err.message || "Error en la solicitud";
+      const msg =
+        err.response?.data?.message || err.message || "Error en la solicitud";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -173,7 +169,9 @@ export function LoginScreen() {
               {isRegisterMode ? "Crear Cuenta" : "Acceso"}
             </h2>
             <p className="text-sm text-slate-500 font-medium">
-              {isRegisterMode ? "Únete a nuestra plataforma" : "Bienvenido de vuelta"}
+              {isRegisterMode
+                ? "Únete a nuestra plataforma"
+                : "Bienvenido de vuelta"}
             </p>
           </div>
 
@@ -201,7 +199,9 @@ export function LoginScreen() {
                 placeholder="Email"
                 required
                 className={`w-full pl-11 py-3 bg-slate-100 rounded-xl outline-none border transition-all text-sm font-bold ${
-                  !emailValid ? "border-red-500" : "border-transparent focus:border-red-600"
+                  !emailValid
+                    ? "border-red-500"
+                    : "border-transparent focus:border-red-600"
                 }`}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -237,7 +237,12 @@ export function LoginScreen() {
                 </div>
                 <p className="text-xs font-medium text-slate-500">
                   Seguridad:{" "}
-                  <span className={getPasswordStrengthColor().replace("bg-", "text-")}>
+                  <span
+                    className={getPasswordStrengthColor().replace(
+                      "bg-",
+                      "text-"
+                    )}
+                  >
                     {getPasswordStrengthText()}
                   </span>
                 </p>
@@ -284,10 +289,17 @@ export function LoginScreen() {
             >
               {loading ? (
                 <Loader2 className="animate-spin" />
+              ) : isRegisterMode ? (
+                "CREAR CUENTA"
               ) : (
-                isRegisterMode ? "CREAR CUENTA" : "INICIAR SESIÓN"
+                "INICIAR SESIÓN"
               )}
-              {!loading && <ArrowRight className="group-hover:translate-x-1 transition-transform" size={18} />}
+              {!loading && (
+                <ArrowRight
+                  className="group-hover:translate-x-1 transition-transform"
+                  size={18}
+                />
+              )}
             </button>
 
             <button
@@ -298,7 +310,9 @@ export function LoginScreen() {
               }}
               className="w-full text-center text-xs font-bold text-slate-400 hover:text-red-600 transition-colors uppercase tracking-widest"
             >
-              {isRegisterMode ? "¿Ya tienes cuenta? Entra aquí" : "¿No tienes cuenta? Regístrate"}
+              {isRegisterMode
+                ? "¿Ya tienes cuenta? Entra aquí"
+                : "¿No tienes cuenta? Regístrate"}
             </button>
           </form>
         </div>

@@ -20,6 +20,7 @@ import MarcasPage from "./pages/admin/MarcasPage";
 import UsuariosPage from "./pages/admin/UsuariosPage";
 import VentasPage from "./pages/admin/VentasPage";
 import MantenimientosPage from "./pages/admin/MantenimientosPage";
+import SolicitudesPage from "./pages/admin/SolicitudesPage";
 
 export default function App() {
   const { isAuthenticated } = useAuth();
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="usuarios" element={<UsuariosPage />} />
         <Route path="ventas" element={<VentasPage />} />
         <Route path="mantenimientos" element={<MantenimientosPage />} />
+        <Route path="solicitudes" element={<SolicitudesPage />} />
       </Route>
 
       {/* VENDEDOR */}

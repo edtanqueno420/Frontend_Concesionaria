@@ -27,7 +27,7 @@ const menu: MenuItem[] = [
   { label: "Versiones", icon: Wrench, path: "/admin/mantenimientos" },
   { label: "Usuarios", icon: Users, path: "/admin/usuarios" },
   { label: "Ventas", icon: ShoppingCart, path: "/admin/ventas" },
-  { label: "Reportes", icon: FileText, path: "/admin/reportes" },
+  { label: "Solicitudes", icon: FileText, path: "/admin/solicitudes" },
 ];
 
 export default function AdminShell() {

@@ -1,17 +1,16 @@
 import type { JSX } from "react";
 import { Navigate } from "react-router-dom";
 
-export function RequireAdmin({ children }: { children: JSX.Element }) {
+export function RequiereVendedor({ children }: { children: JSX.Element }) {
   const token = localStorage.getItem("token");
   const role = (localStorage.getItem("role") || "").toLowerCase();
 
   if (!token) return <Navigate to="/login" replace />;
 
-  // ✅ consistente con LoginScreen: "administrador"
-  if (role !== "administrador" && role !== "admin") {
-    // si es vendedor -> su panel
-    if (role === "vendedor") return <Navigate to="/vendedor" replace />;
-    // cliente u otro -> home
+  if (role !== "vendedor") {
+    if (role === "administrador" || role === "admin") {
+      return <Navigate to="/admin" replace />;
+    }
     return <Navigate to="/home" replace />;
   }
 

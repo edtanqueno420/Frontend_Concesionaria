@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { X, GitCompare, Calendar, Gauge, Fuel, Settings, Palette, DollarSign } from 'lucide-react';
 
 interface CompareDialogProps {
@@ -93,7 +92,7 @@ export function CompareDialog({ open, onOpenChange, compareList, vehicles }: Com
           <div className="p-6">
             {/* Headers de vehículos */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-              {selectedVehicles.map((vehicle, index) => {
+              {selectedVehicles.map((vehicle) => {
                 const info = getVehicleInfo(vehicle);
                 return (
                   <div key={vehicle.id} className="text-center">

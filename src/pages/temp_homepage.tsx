@@ -152,9 +152,10 @@ export function HomePage() {
                 key={v.id}
                 vehiculo={v}
                 isComparing={compareList.includes(v.id)}
-                onToggleCompare={() => {}}
+                onToggleCompare={() => toggleCompare(v.id)}
                 canAddToCompare={compareList.length < 3 || compareList.includes(v.id)}
                 viewMode="grid"
+                compareList={compareList}
               />
             ))
           ) : (
@@ -179,9 +180,10 @@ export function HomePage() {
                 key={v.id}
                 vehiculo={v}
                 isComparing={compareList.includes(v.id)}
-                onToggleCompare={() => {}}
+                onToggleCompare={() => toggleCompare(v.id)}
                 canAddToCompare={compareList.length < 3 || compareList.includes(v.id)}
                 viewMode="grid"
+                compareList={compareList}
               />
             ))
           ) : (

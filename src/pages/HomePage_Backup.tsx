@@ -10,19 +10,6 @@ import { getGalerias } from "../services/galeriaService";
 export function HomePage() {
   const navigate = useNavigate();
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
-  const [compareList, setCompareList] = useState<number[]>([]);
-
-  const toggleCompare = (id: number) => {
-    setCompareList(prev => {
-      if (prev.includes(id)) {
-        return prev.filter(vehicleId => vehicleId !== id);
-      } else if (prev.length < 3) {
-        return [...prev, id];
-      } else {
-        return prev; // No permitir más de 3 vehículos
-      }
-    });
-  };
 
   useEffect(() => {
     async function fetchVehicles() {
@@ -155,6 +142,7 @@ export function HomePage() {
                 onToggleCompare={() => {}}
                 canAddToCompare={false}
                 viewMode="grid"
+                compareList={[]}
               />
             ))
           ) : (
@@ -182,6 +170,7 @@ export function HomePage() {
                 onToggleCompare={() => {}}
                 canAddToCompare={false}
                 viewMode="grid"
+                compareList={[]}
               />
             ))
           ) : (

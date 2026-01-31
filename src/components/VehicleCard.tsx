@@ -11,6 +11,7 @@ interface VehicleCardProps {
   canAddToCompare: boolean;
   viewMode: "grid" | "list";
   onStartSale?: (vehicle: any) => void;
+  compareList: number[];
 }
 
 export function VehicleCard({
@@ -20,6 +21,7 @@ export function VehicleCard({
   canAddToCompare,
   viewMode,
   onStartSale,
+  compareList,
 }: VehicleCardProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
@@ -181,6 +183,8 @@ export function VehicleCard({
           vehiculo={vehiculo}
           open={dialogOpen}
           onOpenChange={setDialogOpen}
+          compareList={compareList}
+          onToggleCompare={() => onToggleCompare()}
         />
       </>
     );
@@ -284,6 +288,8 @@ export function VehicleCard({
         vehiculo={vehiculo}
         open={dialogOpen}
         onOpenChange={setDialogOpen}
+        compareList={compareList}
+        onToggleCompare={() => onToggleCompare()}
       />
     </>
   );

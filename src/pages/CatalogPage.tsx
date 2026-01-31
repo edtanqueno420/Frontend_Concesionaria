@@ -1,12 +1,15 @@
 import { useEffect, useState, useMemo } from 'react';
 import type { Vehiculo } from '../types';
-import { vehicleService } from '../services/vehicleService';
+import { getGalerias } from '../services/galeriaService';
 import { VehicleGrid } from '../components/VehicleGrid';
-import { Search, Filter, RotateCcw } from 'lucide-react';
+import { CompareDialog } from '../components/CompareDialog';
+import { Search, Filter, RotateCcw, GitCompare } from 'lucide-react';
 
 export function CatalogPage() {
   const [vehiculos, setVehiculos] = useState<Vehiculo[]>([]);
   const [loading, setLoading] = useState(true);
+  const [compareList, setCompareList] = useState<number[]>([]);
+  const [compareDialogOpen, setCompareDialogOpen] = useState(false);
   
   // Estados para los filtros
   const [searchTerm, setSearchTerm] = useState('');
@@ -14,16 +17,53 @@ export function CatalogPage() {
   const [maxPrice, setMaxPrice] = useState(200000);
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 
+  const toggleCompare = (id: number) => {
+    setCompareList(prev => {
+      if (prev.includes(id)) {
+        return prev.filter(vehicleId => vehicleId !== id);
+      } else if (prev.length < 3) {
+        return [...prev, id];
+      } else {
+        return prev; // No permitir más de 3 vehículos
+      }
+    });
+  };
+
   useEffect(() => {
-    vehicleService.getAll()
-      .then(data => {
-        setVehiculos(data);
+    async function fetchVehicles() {
+      try {
+        const galerias = await getGalerias();
+
+        const vehiculosConImagen = (galerias ?? [])
+          .map((g: any) => {
+            const vehiculo = g?.vehiculoData;
+            if (!vehiculo) return null;
+
+            const imagenPrincipal =
+              g?.imagenes?.find((i: any) => i?.principal)?.url ??
+              g?.imagenes?.[0]?.url ??
+              null;
+
+            return {
+              ...vehiculo,
+              imagenUrl: imagenPrincipal,
+              imageFocus:
+                vehiculo.id === 1 ? "20% 50%" : // Porsche: más a la izquierda
+                  vehiculo.id === 2 ? "60% 50%" : // Yaris: más al centro/derecha
+                    "50% 55%",
+            };
+          })
+          .filter(Boolean);
+
+        setVehiculos(vehiculosConImagen as Vehiculo[]);
         setLoading(false);
-      })
-      .catch(err => {
+      } catch (err) {
         console.error("Error al cargar el catálogo:", err);
         setLoading(false);
-      });
+      }
+    }
+
+    fetchVehicles();
   }, []);
 
   // LÓGICA DE FILTRADO 
@@ -128,8 +168,27 @@ export function CatalogPage() {
         <VehicleGrid 
           vehiculos={vehiculosFiltrados}
           viewMode={viewMode}
-          compareList={[]}
-          toggleCompare={() => {}}
+          compareList={compareList}
+          toggleCompare={toggleCompare}
+        />
+
+        {/* Botón flotante de comparación */}
+        {compareList.length >= 2 && (
+          <button
+            onClick={() => setCompareDialogOpen(true)}
+            className="fixed bottom-8 right-8 bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-full shadow-2xl transition-all flex items-center gap-3 z-40 font-bold"
+          >
+            <GitCompare className="w-6 h-6" />
+            Comparar ({compareList.length})
+          </button>
+        )}
+
+        {/* Diálogo de comparación */}
+        <CompareDialog
+          open={compareDialogOpen}
+          onOpenChange={setCompareDialogOpen}
+          compareList={compareList}
+          vehicles={vehiculosFiltrados}
         />
       </main>
     </div>

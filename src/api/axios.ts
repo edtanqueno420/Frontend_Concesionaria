@@ -2,7 +2,7 @@ import axios from "axios";
 
 const api = axios.create({
   baseURL: "https://yec-concesionario-api.desarrollo-software.xyz",
-  withCredentials: true, // 🔥 importante para CORS
+  withCredentials: true, 
 });
 
 api.interceptors.request.use((config) => {

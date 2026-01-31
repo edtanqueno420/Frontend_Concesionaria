@@ -13,12 +13,15 @@ import {
   X,
 } from "lucide-react";
 
-import { TestDriveForm } from "./TestDriveForm";
+import { TestDriveForm } from "./TestDriveForm"
+import { SolicitudForm } from "./SolicitudForm"
 
 interface VehicleDetailsDialogProps {
   vehiculo: any;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  compareList: number[];
+  onToggleCompare: (id: number) => void;
 }
 
 export function VehicleDetailsDialog({
@@ -28,6 +31,7 @@ export function VehicleDetailsDialog({
 }: VehicleDetailsDialogProps) {
   const [showCalculator, setShowCalculator] = useState(false);
   const [showTestDrive, setShowTestDrive] = useState(false);
+  const [showSolicitud, setShowSolicitud] = useState(false);
   const valorRetoma = 0;
 
   // --- EXTRACCIÓN DE DATOS REALES (API NestJS) ---
@@ -155,7 +159,7 @@ export function VehicleDetailsDialog({
             </div>
 
             {/* Botones de Acción */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4 border-t-2 border-slate-300">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-4 border-t-2 border-slate-300">
               <ActionButton
                 icon={<Car />}
                 label="Agendar Test Drive"
@@ -167,9 +171,19 @@ export function VehicleDetailsDialog({
                 label="Calcular Financiamiento"
                 onClick={() => setShowCalculator(!showCalculator)}
               />
+              <ActionButton
+                icon={<Mail />}
+                label="Solicitud"
+                onClick={() => setShowSolicitud(!showSolicitud)}
+              />
             </div>
 
-            {/* Formulario de Test Drive */}
+            {/* Formulario de Solicitud */}
+            {showSolicitud && (
+              <div className="mt-4 p-4 bg-slate-50 rounded-lg border-2 border-slate-200">
+                <SolicitudForm vehiculo={vehiculo} />
+              </div>
+            )}
             {showTestDrive && (
               <div className="mt-4 p-4 bg-slate-50 rounded-lg border-2 border-slate-200">
                 <TestDriveForm vehiculo={vehiculo} />
